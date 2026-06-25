@@ -1,0 +1,11 @@
+name: pydeseq2
+channels: [conda-forge, bioconda]
+dependencies:
+  - python>=3.10
+  - anndata
+  - scanpy
+  - pandas
+  - decoupler            # get_pseudobulk
+  - pip
+  - pip:
+      - pydeseq2

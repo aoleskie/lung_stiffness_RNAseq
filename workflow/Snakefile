@@ -1,0 +1,23 @@
+# scRNA-seq lung / NSCLC pipeline
+# Layout follows Snakemake best practices: config/, workflow/{Snakefile,rules,envs,scripts}.
+from snakemake.utils import min_version
+min_version("7.0")
+
+configfile: "config/config.yaml"
+
+include: "rules/common.smk"
+include: "rules/refs.smk"
+include: "rules/quant.smk"
+include: "rules/qc.smk"
+include: "rules/integrate.smk"
+include: "rules/cluster.smk"
+include: "rules/biology.smk"
+
+# Default target: the v1/v2 biology outputs (+ alignment lesson if configured).
+rule all:
+    input:
+        f"{RESULTS}/cluster/annotated.h5ad",
+        f"{RESULTS}/biology/signature_scores.csv",
+        f"{RESULTS}/biology/pseudobulk_de.csv",
+        f"{RESULTS}/figures/umap_clusters.png",
+        LESSON_TARGETS,

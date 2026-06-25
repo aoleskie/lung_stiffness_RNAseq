@@ -1,0 +1,20 @@
+name: scanpy
+channels: [conda-forge, bioconda]
+dependencies:
+  - python>=3.10
+  - scanpy>=1.10
+  - anndata
+  - numpy
+  - scipy
+  - pandas
+  - matplotlib
+  - scikit-misc          # seurat_v3 HVG
+  - leidenalg
+  - python-igraph
+  - scrublet
+  - harmonypy            # sc.external.pp.harmony_integrate
+  - decoupler            # PROGENy / pathway activity
+  - omnipath
+  - pip
+  - pip:
+      - celltypist       # optional: reference-based annotation / HLCA transfer

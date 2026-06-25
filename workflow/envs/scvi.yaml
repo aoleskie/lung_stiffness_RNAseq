@@ -1,0 +1,10 @@
+# Optional: swap the integrate rule to this env for scVI-based integration.
+name: scvi
+channels: [conda-forge, bioconda]
+dependencies:
+  - python>=3.10
+  - scanpy
+  - anndata
+  - pip
+  - pip:
+      - scvi-tools

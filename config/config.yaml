@@ -1,0 +1,72 @@
+# ============================================================================
+# Project config. Everything the pipeline needs lives here or in samples.tsv.
+# ============================================================================
+
+samples: "config/samples.tsv"
+results_dir: "results"
+resources_dir: "resources"
+
+# ---- FASTQ alignment lesson (run ONCE, on one open sample) -----------------
+# Patient FASTQs are usually controlled-access, so learn read->count on a
+# single open sample, then use precomputed matrices for the real analysis.
+# List the sample_id(s) (must be input_type=fastq in samples.tsv). Empty = skip.
+fastq_lesson_samples: []          # e.g. ["lesson_1"]
+
+reference:                         # only used by the STARsolo lesson
+  star_index: "resources/star_index"
+  genome_fasta_url: "FILL_ME"      # e.g. GENCODE primary assembly .fa.gz
+  gtf_url: "FILL_ME"               # matching GENCODE annotation .gtf.gz
+  cb_whitelist: "resources/whitelists/3M-february-2018.txt"   # 10x v3
+  cb_len: 16
+  umi_len: 12
+
+# ---- per-sample QC ---------------------------------------------------------
+qc:
+  method: "mad"          # "mad" (adaptive) or "fixed"
+  n_mads: 5
+  min_genes: 200         # fixed-mode fallbacks
+  min_counts: 500
+  max_pct_mito: 20
+  mito_prefix: "MT-"     # human mitochondrial gene prefix
+  doublet_method: "scrublet"   # scrublet | none
+
+# ---- normalization / features / PCA ---------------------------------------
+norm:
+  method: "lognorm"      # lognorm (log1p CP10k) | pearson (analytic residuals)
+  target_sum: 10000
+  n_top_genes: 2000
+  n_pcs: 30
+
+# ---- integration -----------------------------------------------------------
+integration:
+  method: "harmony"      # harmony | none   (scvi = swap rule to envs/scvi.yaml)
+  batch_key: "donor_id"
+
+# ---- clustering / annotation ----------------------------------------------
+cluster:
+  n_neighbors: 15
+  resolution: 1.0
+  annotation: {}         # optional manual map, e.g. {"3": "CTHRC1+ fibroblast"}
+
+# ---- differential expression (per-donor PSEUDOBULK, not per cell) ----------
+de:
+  condition_key: "condition"
+  group_a: "fibrotic"    # contrast: group_a vs group_b
+  group_b: "normal"
+  sample_key: "donor_id"
+  min_cells_per_sample: 10
+  min_counts_per_gene: 10
+
+# ---- signature gene sets (HGNC symbols) -----------------------------------
+# v1 uses the ECM sets; v2 adds the model-node sets (YAP/TAZ, PI3K-AKT, CDK4/6).
+signatures:
+  stiffening_ecm:   [COL1A1, COL1A2, COL3A1, FN1, ELN, FBN1]
+  ecm_crosslinkers: [LOX, LOXL1, LOXL2, LOXL3, LOXL4, PLOD2, TGM2]
+  yap_taz_targets:  [CTGF, CYR61, ANKRD1, AMOTL2, THBS1, CAV1, TEAD1]  # CTGF=CCN2, CYR61=CCN1
+  pi3k_akt_axis:    [AKT1, PIK3CA, PDPK1, FOXO3, GSK3B, RPS6KB1]
+  cdk46_cellcycle:  [CCND1, CDK4, CDK6, RB1, CDKN1A, CDKN2A, E2F1]
+
+pathways:                # PROGENy pathway activity via decoupler (optional)
+  use_progeny: true
+  progeny_organism: "human"
+  progeny_top: 500

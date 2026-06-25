@@ -1,0 +1,9 @@
+# Driver environment (runs Snakemake itself). Per-rule tool envs live in workflow/envs/.
+#   mamba env create -f environment.yml && conda activate scrna-driver
+name: scrna-driver
+channels: [conda-forge, bioconda]
+dependencies:
+  - python>=3.10
+  - snakemake-minimal>=7.32
+  - pandas
+  - graphviz          # for `snakemake --dag | dot`
