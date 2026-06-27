@@ -22,13 +22,13 @@ reference:                         # only used by the STARsolo lesson
 
 # ---- per-sample QC ---------------------------------------------------------
 qc:
-  method: "mad"          # "mad" (adaptive) or "fixed"
+  method: "fixed"
   n_mads: 5
-  min_genes: 200         # fixed-mode fallbacks
-  min_counts: 500
-  max_pct_mito: 20
-  mito_prefix: "MT-"     # human mitochondrial gene prefix
-  doublet_method: "scrublet"   # scrublet | none
+  min_genes: 300         # light; SCEA already cell-called. Trims IPF's near-empty tail (min 124 genes) without touching shallow normal cells (min ~348)
+  min_counts: 500        # backstop only - both samples bottom out near 750, so this stays out of the way
+  max_pct_mito: 20       # lenient on purpose; 15% over-cuts fibrotic cells. The real mito call happens after clustering
+  mito_prefix: "MT-"
+  doublet_method: "scrublet"
 
 # ---- normalization / features / PCA ---------------------------------------
 norm:
@@ -46,7 +46,29 @@ integration:
 cluster:
   n_neighbors: 15
   resolution: 1.0
-  annotation: {}         # optional manual map, e.g. {"3": "CTHRC1+ fibroblast"}
+  annotation:
+    "4": "Pathologic fibroblast (CTHRC1+)"
+    "0": "Alveolar fibroblast"
+    "12": "Alveolar fibroblast"
+    "10": "Adventitial fibroblast"
+    "21": "Inflammatory fibroblast (HAS1+)"
+    "18": "Myofibroblast"
+    "16": "Myofibroblast"
+    "1": "Vascular smooth muscle"
+    "2": "Activated smooth muscle"
+    "3": "Pericyte"
+    "5": "Endothelial"
+    "20": "Endothelial (capillary)"
+    "11": "Alveolar epithelial"
+    "19": "Ciliated epithelial"
+    "6": "Macrophage"
+    "8": "Monocyte"
+    "9": "Dendritic cell"
+    "7": "Lymphocyte"
+    "14": "Lymphocyte"
+    "13": "NK / cytotoxic T"
+    "15": "Plasma cell"
+    "17": "Mast cell"
 
 # ---- differential expression (per-donor PSEUDOBULK, not per cell) ----------
 de:

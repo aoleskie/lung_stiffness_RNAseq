@@ -58,6 +58,36 @@ snakemake --use-conda --cores 8 results/cluster/annotated.h5ad
   `fastq_lesson_samples`, and fill in the reference URLs in `config.yaml`.
 - **v2 matrices:** Kim GSE131907 processed matrix from GEO (open). Maynard 2020 - verify access first.
 
+### Ingesting the SCEA MatrixMarket bundle (v1)
+
+SCEA hands you one aggregated matrix (genes x cells) + two sidecar files + a separate
+experiment-design TSV - not per-sample matrices. `scripts/ingest_scea.py` converts that bundle
+into the per-donor `.h5ad` files this pipeline expects. Download the **raw counts archive** and the
+**experiment-design TSV** from E-CURD-126, unzip into `resources/tsukui/`, then run (in the scanpy env):
+
+```bash
+python workflow/scripts/ingest_scea.py \
+    --mtx    resources/tsukui/E-CURD-126.aggregated_filtered_counts.mtx \
+    --rows   resources/tsukui/E-CURD-126.aggregated_filtered_counts.mtx_rows \
+    --cols   resources/tsukui/E-CURD-126.aggregated_filtered_counts.mtx_cols \
+    --design resources/tsukui/ExpDesign-E-CURD-126.tsv \
+    --outdir resources/tsukui
+```
+
+It transposes to cells x genes, resolves gene symbols, joins the design TSV for condition + donor,
+writes one `.h5ad` per donor, and emits `config/samples_tsukui.tsv`. It prints exactly which columns
+it detected and the disease->condition mapping - check those, and override with
+`--condition-col` / `--donor-col` / `--id-col` if needed. Then copy the generated rows into
+`config/samples.tsv` and run `snakemake -n`.
+
+**Gene symbols.** SCEA's `.mtx_rows` is often Ensembl-only, which breaks `MT-` mito QC and
+symbol-based signatures. Resolve symbols one of two ways:
+- `--gtf path/to/annotation.gtf` - **offline and reproducible** (recommended). Use the GENCODE/Ensembl
+  GTF for the release the data was built on; the script reads `gene_id`->`gene_name` and strips version suffixes.
+- `--use-mygene` - queries mygene.info over the network. Quick, but maps against current annotations.
+
+Genes with no symbol keep their Ensembl ID; the original IDs are always preserved in `adata.var['gene_ids']`.
+
 ## How to work with it
 
 Each `scripts/*.py` is a Snakemake `script:` step (the `snakemake` object is injected). They are

@@ -8,10 +8,16 @@ rule signatures:
     script: "../scripts/score_signatures.py"
 
 rule pseudobulk_de:
-    input:  f"{RESULTS}/cluster/annotated.h5ad"
+    input:  expand(f"{RESULTS}/qc/{{s}}.h5ad", s=MATRIX_SAMPLES)
     output: f"{RESULTS}/biology/pseudobulk_de.csv"
     conda:  "../envs/pydeseq2.yaml"
     script: "../scripts/pseudobulk_de.py"
+
+rule pseudobulk_de_fibroblast:
+    input: qc=expand(f"{RESULTS}/qc/{{s}}.h5ad", s=MATRIX_SAMPLES), annotated=f"{RESULTS}/cluster/annotated.h5ad",
+    output: f"{RESULTS}/biology/pseudobulk_de_fibroblast.csv"
+    conda:  "../envs/pydeseq2.yaml"
+    script: "../scripts/pseudobulk_de_fibroblast.py"
 
 # v2 stretch (scaffold): malignant-cell calling by CNV. Wire into `all` for v2.
 # rule infercnv:

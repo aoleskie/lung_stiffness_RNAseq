@@ -20,6 +20,7 @@ def load_counts(path):
 
 adata = load_counts(sm.input[0])
 adata.var_names_make_unique()
+adata.layers["counts"] = adata.X.copy()
 
 # carry sample-level metadata through the whole pipeline
 adata.obs["sample_id"] = sm.params.sample
@@ -50,13 +51,17 @@ adata = adata[np.asarray(keep)].copy()
 
 # doublets
 if cfg.get("doublet_method") == "scrublet":
+    n_before = adata.n_obs
     try:
         sc.pp.scrublet(adata)
+        n_dbl = int(adata.obs["predicted_doublet"].sum())
         adata = adata[~adata.obs["predicted_doublet"]].copy()
-    except Exception as e:  # version/skip-safe
-        print("scrublet skipped:", e)
+        print(f"{sm.params.sample}: scrublet flagged {n_dbl} doublets "
+              f"({n_dbl/max(n_before,1):.1%}) -> {adata.n_obs} cells kept")
+    except Exception as e:
+        print(f"{sm.params.sample}: scrublet SKIPPED ({e}); doublets NOT removed")
 
 # stash raw counts for later (pseudobulk + seurat_v3 HVG)
-adata.layers["counts"] = adata.X.copy()
+
 adata.write(sm.output[0])
 print(f"{sm.params.sample}: {adata.n_obs} cells x {adata.n_vars} genes after QC")

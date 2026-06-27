@@ -1,20 +1,21 @@
 name: scanpy
 channels: [conda-forge, bioconda]
 dependencies:
-  - python>=3.10
+  - python=3.12
   - scanpy>=1.10
   - anndata
   - numpy
   - scipy
   - pandas
   - matplotlib
-  - scikit-misc          # seurat_v3 HVG
   - leidenalg
   - python-igraph
-  - scrublet
-  - harmonypy            # sc.external.pp.harmony_integrate
-  - decoupler            # PROGENy / pathway activity
+  - harmonypy
+  - decoupler
   - omnipath
+  - scikit-image
   - pip
   - pip:
+      - scikit-misc      # conda-forge has no win-64 build; pip ships Windows wheels
       - celltypist       # optional: reference-based annotation / HLCA transfer
+      - mygene           # optional: Ensembl->symbol fallback in ingest_scea.py

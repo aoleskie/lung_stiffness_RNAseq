@@ -1,6 +1,7 @@
 """Concatenate QC'd samples, normalize, pick HVGs, PCA -> merged.h5ad."""
 import scanpy as sc
 import anndata as ad
+import numpy as np
 
 sm = snakemake  # noqa: F821
 cfg = sm.config["norm"]
@@ -17,9 +18,8 @@ if cfg["method"] == "pearson":
 else:
     sc.pp.normalize_total(adata, target_sum=cfg["target_sum"])
     sc.pp.log1p(adata)
-    adata.raw = adata  # full gene set, for marker tests / scoring
-    sc.pp.highly_variable_genes(adata, n_top_genes=cfg["n_top_genes"],
-                                flavor="seurat_v3", layer="counts")
+    adata.raw = adata
+    sc.pp.highly_variable_genes(adata, n_top_genes=cfg["n_top_genes"], flavor="seurat")
 
 adata = adata[:, adata.var["highly_variable"]].copy()
 sc.pp.scale(adata, max_value=10)
