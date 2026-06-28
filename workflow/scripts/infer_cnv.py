@@ -36,7 +36,7 @@ cfg = sm.config["cnv"]
 ccfg = sm.config["cluster"]
 
 # ---- 1. full-gene matrix: concatenate per-sample files ----
-files = sorted(glob.glob(f"{sm.config['resources_dir']}/LUNG_*.h5ad"))
+files = sorted(glob.glob(f"{sm.config['resources_dir']}/*.h5ad"))
 print(f"concatenating {len(files)} per-sample files (full gene set) ...")
 parts = [sc.read_h5ad(f) for f in files]
 adata = ad.concat(parts, join="inner", index_unique="-", label="batch")
@@ -52,7 +52,9 @@ have = [c for c in cols if c in ann.columns]
 ann_by_bc = {strip(bc): row for bc, row in zip(ann.index, ann[have].astype(str).to_dict("records"))}
 keys = [strip(b) for b in adata.obs_names]
 matched = np.mean([k in ann_by_bc for k in keys])
-assert matched > 0.95, f"only {matched:.1%} of cells matched annotated labels"
+# match rate ≈ QC survival rate: concat has all pre-QC cells, annotated.h5ad only survivors.
+# Maynard QC dropped ~18% failed wells, so ~80% is correct here (Kim was ~99.6%).
+assert matched > 0.6, f"only {matched:.1%} of cells matched annotated labels — too low, check the join"
 for c in have:
     adata.obs[c] = [ann_by_bc.get(k, {}).get(c, "NA") for k in keys]
 # keep only cells that survived QC/clustering (present in annotated)

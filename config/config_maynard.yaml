@@ -1,0 +1,109 @@
+# =============================================================================
+# config_maynard.yaml — v3 (Maynard 2020, PRJNA591860; Smart-seq2 EGFR/ALK lung adeno)
+#
+# Run:  snakemake --configfile config/config_maynard.yaml --cores 4 <target>
+#
+# Smart-seq2, NOT 10x. Key differences baked in below:
+#   - read counts (not UMIs)  -> hvg_flavor "seurat" (like v1's fractional counts), NOT seurat_v3
+#   - plate-based, 1 cell/well -> NO scrublet (droplet doublets don't apply)
+#   - deeper per cell          -> higher min_genes / min_counts
+#   - ERCC spike-ins already stripped at ingest
+# Isolated from v1/v2: own resources/ + results_ dirs.
+# =============================================================================
+
+# ---- paths (separate from Tsukui & Kim) ----
+resources_dir: "resources/maynard"
+results_dir:   "results_maynard"
+samples:       "config/samples_maynard.tsv"
+
+# ---- QC (Smart-seq2: read counts, deep, no droplet doublets) ----
+qc:
+  method: "fixed"
+  min_genes: 500          # removes failed wells (5th pct ~40 genes); keeps real cells (median 2352)
+  min_counts: 5000        # light backstop below the real-cell distribution
+  max_pct_mito: 100       # mito genes stripped from this matrix — no mito QC possible; gate disabled
+  mito_prefix: "MT-"      # harmless; nothing matches, pct_counts_mito stays 0
+  doublet_method: "none"
+
+# ---- normalize / HVG ----
+# Smart-seq2 read counts -> use "seurat" flavor (operates on log-normalized data), NOT seurat_v3
+# (seurat_v3 expects UMI-like raw counts; full-length read counts violate its mean-variance model).
+normalization:
+  target_sum: 10000       # CP10k then log1p
+  n_top_genes: 2000
+  hvg_flavor: "seurat"
+
+# ---- integration ----
+# Batch is plate (technical) — Smart-seq2 plate effects are real. Patient is the donor unit.
+integration:
+  method: "harmony"
+  batch_key: "plate"      # technical batch; patient_id is the biological/donor grouping
+
+# ---- clustering ----
+cluster:
+  n_neighbors: 15
+  resolution: 1.0
+  annotation:
+    "0": "B"
+    "1": "Epithelial"
+    "2": "Myeloid"
+    "3": "Fibroblast"
+    "4": "T/NK"
+    "5": "Myeloid"
+    "6": "Epithelial"
+    "7": "B"
+    "8": "Endothelial"
+    "9": "Myeloid"
+    "10": "Epithelial"
+    "11": "Myeloid"
+    "12": "B"
+    "13": "Epithelial"
+    "14": "Mast"
+    "15": "B"
+    "16": "Fibroblast"
+    "17": "B"
+    "18": "Epithelial"
+    "19": "Fibroblast"
+    "20": "Myeloid"
+    "21": "B"
+    "22": "Epithelial"
+    "23": "B"
+    "24": "Myeloid"
+    "25": "B"
+
+# ---- signatures: the model-node sets (the whole point — tested across TN->RD->PD) ----
+signatures:
+  stiffening_ecm:   [COL1A1, COL1A2, COL3A1, FN1, ELN, FBN1]
+  ecm_crosslinkers: [LOX, LOXL1, LOXL2, LOXL3, LOXL4, PLOD2, TGM2]
+  yap_taz_targets:  [CTGF, CCN2, CYR61, CCN1, ANKRD1, AMOTL2, THBS1, CAV1, TEAD1]
+  pi3k_akt_axis:    [AKT1, PIK3CA, PDPK1, FOXO3, GSK3B, RPS6KB1]
+  cdk46_cellcycle:  [CCND1, CDK4, CDK6, RB1, CDKN1A, CDKN2A, E2F1]
+  proliferation:    [MKI67, TOP2A, PCNA, CCNB1, CDK1, BIRC5]
+  # alveolar-regenerative / AT2 primitive program the authors found enriched at RD — a useful
+  # positive control that the persister state is being captured:
+  at2_regenerative: [SFTPC, SFTPB, SFTPA1, NAPSA, LAMP3, ETV5]
+
+# ---- DE / stage contrasts ----
+# condition = treatment stage. Primary persister contrast is RD vs TN; also RD vs PD.
+# Restrict to EGFR-driver patients downstream (driver_gene column) for the model-relevant population.
+de:
+  sample_key: "sample_id"
+  condition_key: "condition"
+  group_a: "RD"           # residual disease = drug-tolerant persister (the focal state)
+  group_b: "TN"           # treatment-naive baseline
+  min_cells_per_sample: 20
+  min_counts_per_gene: 10
+
+# ---- CNV / malignant-cell calling (inferCNVpy) — reuse the Kim machinery ----
+# Maynard authors themselves called cancer cells via inferCNV (NI03), so this matches their approach.
+cnv:
+  malignant_candidate: "Epithelial"             # coarse label after annotation
+  reference_cats:                               # immune cells = diploid reference
+    - "T/NK"
+    - "Myeloid"
+    - "B"
+  reference_key: "cell_type"
+  gene_order_file: "resources/maynard/gene_positions.tsv"
+  window_size: 100
+  step: 10
+  cnv_score_threshold: null   # set from the diagnostic, as in Kim
