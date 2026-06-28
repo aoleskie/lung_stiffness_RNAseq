@@ -1,0 +1,105 @@
+# =============================================================================
+# config_kim.yaml — v2 (Kim GSE131907 NSCLC atlas, tLung + nLung)
+#
+# Run with:  snakemake --configfile config/config_kim.yaml --use-conda --cores 4 <target>
+#
+# Kept SEPARATE from the v1 config so nothing about the Tsukui analysis is touched.
+# Two dirs differ from v1 on purpose — outputs land in results_kim/, inputs read
+# from resources/kim/ — so v1 and v2 never clobber each other.
+# =============================================================================
+
+# ---- paths (DIFFERENT from v1: keep the two analyses isolated) ----
+resources_dir: "resources/kim"
+results_dir:   "results_kim"
+samples:       "config/samples_kim.tsv"
+# NOTE: if the QC rule currently hardcodes resources/tsukui/{sample}.h5ad, change it to
+#   f"{config['input_dir']}/{{sample}}.h5ad"
+# and add  results_dir/input_dir  reads in the Snakefile. Then v1's config.yaml sets
+# input_dir: resources/tsukui and the SAME rules serve both datasets via --configfile.
+
+# ---- QC (10x droplet — unlike SCEA's sorted cells) ----
+qc:
+  method: "fixed"
+  n_mads: 5
+  min_genes: 200          # Kim's own floor; data already ~>=200 genes (min observed 212)
+  min_counts: 1000        # light backstop; UMI distribution starts ~1015
+  max_pct_mito: 20        # Kim's threshold; mito is tight here (median 3.7%, 95th 7.5%)
+  mito_prefix: "MT-"      # symbols already present, 13 MT- genes confirmed
+  doublet_method: "scrublet"   # REAL doublets in 10x (unlike ~0% in sorted Tsukui) — keep on
+
+# ---- normalize / HVG ----
+# KEY v1->v2 CHANGE: Kim is integer UMI, so seurat_v3 (the better, raw-count flavor) works.
+# v1 was forced to "seurat" because SCEA counts were fractional. No rounding hacks needed here.
+normalization:
+  target_sum: 10000       # CP10k
+  n_top_genes: 2000
+  hvg_flavor: "seurat_v3" # requires integer counts -> valid for Kim
+
+# ---- integration ----
+integration:
+  method: "harmony"
+  batch_key: "sample"     # per-sample batch. Tumor/normal share patients (T06<->N06 etc.);
+                          # patient-paired correction is a possible refinement, not needed yet.
+
+# ---- clustering ----
+cluster:
+  n_neighbors: 15
+  resolution: 1.0
+  annotation:
+    "0": "Myeloid"
+    "1": "T/NK"
+    "2": "T/NK"
+    "3": "T/NK"
+    "4": "Epithelial"
+    "5": "Myeloid"
+    "6": "B"
+    "7": "Myeloid"
+    "8": "T/NK"
+    "9": "Myeloid"
+    "10": "Fibroblast"
+    "11": "Mast"
+    "12": "B"
+    "13": "Endothelial"
+    "14": "Myeloid"
+    "15": "Epithelial"
+    "16": "Epithelial"
+    "17": "Epithelial"
+    "18": "Epithelial"
+    "19": "Epithelial"
+    "20": "Fibroblast"
+    "21": "Endothelial"
+    "22": "Epithelial"
+    "23": "Fibroblast"
+
+# ---- signatures: the v1 model-node sets (now finally tested in tumor cells) ----
+# pi3k_akt_axis and yap_taz_targets were deliberately flat in v1 fibroblasts; their real
+# test is here in malignant epithelium. Same gene sets = clean v1<->v2 comparison.
+signatures:
+  stiffening_ecm:   [COL1A1, COL1A2, COL3A1, FN1, ELN, FBN1]
+  ecm_crosslinkers: [LOX, LOXL1, LOXL2, LOXL3, LOXL4, PLOD2, TGM2]
+  yap_taz_targets:  [CTGF, CYR61, ANKRD1, AMOTL2, THBS1, CAV1, TEAD1]
+  pi3k_akt_axis:    [AKT1, PIK3CA, PDPK1, FOXO3, GSK3B, RPS6KB1]
+  cdk46_cellcycle:  [CCND1, CDK4, CDK6, RB1, CDKN1A, CDKN2A, E2F1]
+  # optional v2 additions once clusters are seen (uncomment to use):
+  # egfr_signaling: [EGFR, ERBB2, ERBB3, GRB2, SOS1, MAPK1, MAPK3]
+  # proliferation:  [MKI67, TOP2A, PCNA, CCNB1, CDK1, BIRC5]
+
+# ---- pseudobulk DE ----
+# group_a/group_b now mean tumor vs normal. Integer counts => the DESeq2 rounding line is a
+# no-op (safe to leave). CAVEAT: epithelial + fibroblast counts are uneven across samples;
+# restricted DE (see v1) will drop samples below min_cells_per_sample — expect lower N.
+de:
+  sample_key: "sample"
+  condition_key: "condition"
+  group_a: "tumor"
+  group_b: "normal"
+  min_cells_per_sample: 10
+  min_counts_per_gene: 10
+
+# ---- CNV / malignant-cell calling (inferCNVpy) — config baked in; RULE added next ----
+# Infers large-scale copy-number from expression: aneuploid epithelial cells = malignant.
+# Diploid reference = immune cells (unambiguously normal karyotype).
+cnv:
+  cnv_score_threshold: 0.0115   # set from the diagnostic: valley between diploid (~0.008) and aneuploid (~0.014) epithelial modes
+
+

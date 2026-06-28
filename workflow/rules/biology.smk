@@ -19,6 +19,14 @@ rule pseudobulk_de_fibroblast:
     conda:  "../envs/pydeseq2.yaml"
     script: "../scripts/pseudobulk_de_fibroblast.py"
 
+rule infer_cnv:
+    input: annotated = f"{RESULTS}/cluster/annotated.h5ad",
+    output:
+        h5ad   = f"{RESULTS}/cnv/cnv.h5ad",
+        scores = f"{RESULTS}/cnv/cnv_scores.csv",
+        fig    = f"{RESULTS}/figures/cnv_diagnostics.png",
+    script: "../scripts/infer_cnv.py"
+
 # v2 stretch (scaffold): malignant-cell calling by CNV. Wire into `all` for v2.
 # rule infercnv:
 #     input:  f"{RESULTS}/cluster/annotated.h5ad"

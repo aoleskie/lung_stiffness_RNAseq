@@ -25,12 +25,20 @@ mk = pd.concat(
     names=["cluster", "rank"]).reset_index(level=0)
 mk.to_csv(sm.output["markers"], index=False)
 
-# optional manual annotation map from config; otherwise label by cluster id
+# annotation precedence:
+#   1. explicit cluster->label map in config (cfg["annotation"])
+#   2. author/pre-existing cell_type already on the cells (preserve it)
+#   3. fall back to bare cluster ids
 ann = cfg.get("annotation") or {}
-adata.obs["cell_type"] = (
-    adata.obs["leiden"].map(lambda c: ann.get(str(c), f"cluster_{c}"))
-    if ann else "cluster_" + adata.obs["leiden"].astype(str)
-).astype("category")
+if ann:
+    adata.obs["cell_type"] = adata.obs["leiden"].map(
+        lambda c: ann.get(str(c), f"cluster_{c}")).astype("category")
+elif "cell_type" in adata.obs and adata.obs["cell_type"].notna().any():
+    # keep the labels carried through from ingest (e.g. Kim author annotations)
+    adata.obs["cell_type"] = adata.obs["cell_type"].astype("category")
+    print(f"using pre-existing cell_type ({adata.obs['cell_type'].nunique()} labels)")
+else:
+    adata.obs["cell_type"] = ("cluster_" + adata.obs["leiden"].astype(str)).astype("category")
 
 sc.pl.umap(adata, color=["leiden", "condition", "cell_type"], ncols=3, show=False)
 plt.savefig(sm.output["umap"], dpi=150, bbox_inches="tight")
