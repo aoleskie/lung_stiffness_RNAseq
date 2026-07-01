@@ -1,15 +1,11 @@
 # ============================================================================
-# Project config. Everything the pipeline needs lives here or in samples.tsv.
+# Project config
 # ============================================================================
 
 samples: "config/samples.tsv"
 results_dir: "results"
 resources_dir: "resources"
 
-# ---- FASTQ alignment lesson (run ONCE, on one open sample) -----------------
-# Patient FASTQs are usually controlled-access, so learn read->count on a
-# single open sample, then use precomputed matrices for the real analysis.
-# List the sample_id(s) (must be input_type=fastq in samples.tsv). Empty = skip.
 fastq_lesson_samples: []          # e.g. ["lesson_1"]
 
 reference:                         # only used by the STARsolo lesson
@@ -26,7 +22,7 @@ qc:
   n_mads: 5
   min_genes: 300         # light; SCEA already cell-called. Trims IPF's near-empty tail (min 124 genes) without touching shallow normal cells (min ~348)
   min_counts: 500        # backstop only - both samples bottom out near 750, so this stays out of the way
-  max_pct_mito: 20       # lenient on purpose; 15% over-cuts fibrotic cells. The real mito call happens after clustering
+  max_pct_mito: 20       # 15% over-cuts fibrotic cells. The real mito call happens after clustering
   mito_prefix: "MT-"
   doublet_method: "scrublet"
 

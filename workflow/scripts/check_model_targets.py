@@ -1,20 +1,6 @@
 #!/usr/bin/env python3
 # Per-gene check of the model's DOWNSTREAM cell-cycle targets in the A549 stiff-vs-soft contrast.
 #
-# The model takes AKT/ERK/FAK as measured INPUTS (phospho-Westerns) -> those are NOT transcript
-# quantities, so bulk RNA-seq can't test the input layer. What RNA-seq CAN test is the model's
-# downstream species that the ODE rate laws say should change when the (stiff) input knobs go up:
-#
-#   from the rate laws (cell_cycle_death_model.py):
-#     FAK -> Skp2 synthesis            (ks_Skp2_FAK, line 180)   => SKP2 UP on stiff
-#     FAK -| p21  (FAK in denominator) (ks_p21,      line 199)   => CDKN1A (p21) DOWN on stiff
-#     AKT,ERK -> CycD synthesis        (lines 286/290)           => CCND1 UP on stiff
-#     AKT,ERK -> Myc  synthesis        (lines 270/275)           => MYC  UP on stiff
-#     AKT,ERK -| BH3 (pro-apoptotic; subtracted in ks_BH3, 499)  => (survival arm; not a clean single gene)
-#
-# This is the on-model, on-assay prediction set. Stiff has higher AKT/ERK/FAK than soft
-# (Stiff DMSO [1,1,1] vs Soft DMSO [0.6,1,0.4]) -> CCND1/MYC/SKP2 up, CDKN1A down.
-#
 # Usage: python check_model_targets.py --deseq results_cosgrove/deseq2_stiff_vs_soft.csv
 
 import argparse

@@ -3,7 +3,7 @@
 #
 # Run:  snakemake --configfile config/config_maynard.yaml --cores 4 <target>
 #
-# Smart-seq2, NOT 10x. Key differences baked in below:
+# Smart-seq2, NOT 10x. Key differences below:
 #   - read counts (not UMIs)  -> hvg_flavor "seurat" (like v1's fractional counts), NOT seurat_v3
 #   - plate-based, 1 cell/well -> NO scrublet (droplet doublets don't apply)
 #   - deeper per cell          -> higher min_genes / min_counts
@@ -21,7 +21,7 @@ qc:
   method: "fixed"
   min_genes: 500          # removes failed wells (5th pct ~40 genes); keeps real cells (median 2352)
   min_counts: 5000        # light backstop below the real-cell distribution
-  max_pct_mito: 100       # mito genes stripped from this matrix — no mito QC possible; gate disabled
+  max_pct_mito: 100       # mito genes stripped from this matrix; no mito QC possible; gate disabled
   mito_prefix: "MT-"      # harmless; nothing matches, pct_counts_mito stays 0
   doublet_method: "none"
 
@@ -94,7 +94,7 @@ de:
   min_cells_per_sample: 20
   min_counts_per_gene: 10
 
-# ---- CNV / malignant-cell calling (inferCNVpy) — reuse the Kim machinery ----
+# ---- CNV / malignant-cell calling (inferCNVpy) - reuse the Kim machinery ----
 # Maynard authors themselves called cancer cells via inferCNV (NI03), so this matches their approach.
 cnv:
   malignant_candidate: "Epithelial"             # coarse label after annotation

@@ -1,64 +1,60 @@
-# scRNA-seq: the stiffening lung and NSCLC drug tolerance
+# The stiffening lung and NSCLC drug tolerance
 
-An end-to-end single-cell pipeline (raw matrices → biology) built as a Snakemake workflow.
-It teaches the canonical scRNA-seq workflow **and** tests predictions from a dynamical-systems
-NSCLC model in real data. The model proposes that a stiff/fibrotic microenvironment raises
-FAK/AKT/ERK activity in tumor cells, sustaining proliferation (cyclin D–CDK4/6) and promoting
-EGFR-TKI tolerance. The project tests this across four datasets that share one pipeline.
+An end-to-end single-cell pipeline built as a Snakemake workflow.
+It wanted to learn scRNA-seq workflow and test predictions from a dynamical-systems
+NSCLC model with real data. The central thesis is that a stiff/fibrotic microenvironment increases 
+drug tolerance by increasing FAK/AKT/ERK activity in tumor cells, sustaining proliferation 
+(cyclin D–CDK4/6) and promoting EGFR-TKI tolerance. The project tests this across four datasets 
+that share one pipeline.
 
-## What the model actually claims (and what data can test)
+## Background Model
 
-The model (`cell_cycle_death_model.py`) takes **AKT, ERK, and FAK as three independent measured
-inputs** — kinase activities set per (stiffness, drug) condition from phospho-Westerns — feeding a
-cell-cycle/apoptosis ODE system. Two consequences shape every analysis here:
+The mitosis-apoptosis model (soon to be submitted!) takes **AKT, ERK, and FAK as three 
+independent measured inputs** where kinase activities are set per (stiffness, drug) condition from 
+phospho-Westerns, feeding into a cell-cycle/apoptosis ODE system. Two considerations for this analysis 
+are:
 
 1. **The kinase inputs are phospho-regulated, not transcriptional.** scRNA-seq / RNA-seq cannot test
-   AKT/ERK/FAK *activity* — those are measured by Western in the manuscript, not by mRNA. What
-   transcriptomics **can** test is the model's **downstream species**: the cell-cycle players the ODE
+   AKT/ERK/FAK activity. Those are measured by Westerns in the manuscript. What
+   transcriptomics can test is the model's downstream species: the cell-cycle components the ODE
    rate laws drive when the inputs rise (CCND1, MYC, SKP2 up; CDKN1A down; the E2F program following).
 2. **YAP/TAZ is not a node in this model.** It routes mechanotransduction through FAK/AKT/ERK → cell
-   cycle. YAP/TAZ target genes are scored only as an external mechanobiology *readout* (and because the
+   cycle. YAP/TAZ target genes are scored only as an external mechanobiology readout (and because the
    Cosgrove source paper centers on them), never as evidence for this model.
 
-> Earlier framings of this project (and the prior README) described testing "the YAP/TAZ and PI3K-AKT
-> signatures the model predicts." That was imprecise: YAP/TAZ isn't in the model, and the kinase nodes
-> aren't transcriptionally testable. The corrected, on-model/on-assay test is the **downstream
-> cell-cycle target set**, evaluated as a coordinated group.
+## The four data sets and analyses
 
-## The four installments
-
-- **v1 — fibrosis (Tsukui 2020, E-CURD-126 / GSE132771).** Recover the CTHRC1+ pathologic fibroblast
+- **v1 - fibrosis (Tsukui 2020, E-CURD-126 / GSE132771).** Recover the CTHRC1+ pathologic fibroblast
   population and quantify the matrix-stiffening program (collagens + LOX/LOXL2 crosslinkers) that
   expands in fibrosis. *Result: the stiffening niche exists and is cell-intrinsic (pathologic
   fraction separates fibrotic vs normal, p=0.018; pseudobulk DE separates compositional from
   cell-intrinsic effects).*
-- **v2 — NSCLC TME (Kim 2020, GSE131907).** Call malignant cells by CNV, characterize the tumor
-  microenvironment. *Result (headline): the CAF bridge — tumor fibroblasts cell-intrinsically
+- **v2 - NSCLC TME (Kim 2020, GSE131907).** Call malignant cells by CNV, characterize the tumor
+  microenvironment. *Result: the CAF bridge - tumor fibroblasts cell-intrinsically
   reactivate the CTHRC1+ stiffening program (vs normal lung fibroblasts, p≈0; fibroblast-restricted
-  PyDESeq2 confirms cell-intrinsic activation). Tumors **build** the stiff niche. Malignant-cell
+  PyDESeq2 confirms cell-intrinsic activation). Tumors build the stiff niche. Malignant-cell
   mechanotransduction signatures are flat-to-lower, and malignant calling is depth-confounded
-  (r=−0.79) — a droplet artifact that caps the tumor-intrinsic claim.*
-- **v3 — treatment trajectory (Maynard 2020, PRJNA591860, Smart-seq2).** EGFR/ALK lung adeno across
+  (r=−0.79), a droplet artifact that caps the tumor-intrinsic claim.*
+- **v3 - treatment trajectory (Maynard 2020, PRJNA591860, Smart-seq2).** EGFR/ALK lung adeno across
   treatment-naive → residual-disease (persister) → progression. Cleanest CNV calling in the project
-  (uniform Smart-seq2 depth, no confound). *Result: genuine persister biology — the alveolar-
-  regenerative (AT2) program fires at residual disease, cyclin D–CDK4/6 collapses (persister
-  quiescence). **But** the treatment axis confounds drug/selection/time and never varies stiffness, so
-  it cannot test the stiffness prediction; and the cell-level mechano-signatures are pseudoreplication
-  — they do **not** survive aggregation to the patient (YAP RD-vs-TN p≈1.0 across N=5). Reframed as a
+  (uniform Smart-seq2 depth, no confound). *Result: genuine persister biology, the alveolar-
+  regenerative (AT2) program activates at residual disease, cyclin D–CDK4/6 collapses (persister
+  quiescence). The treatment axis confounds drug/selection/time and never varies stiffness, so
+  it cannot test the stiffness prediction; and the cell-level mechano-signatures are pseudoreplication. 
+  They do not survive aggregation to the patient (YAP RD-vs-TN p≈1.0 across N=5). Reframed as a
   treatment-trajectory result, not a stiffness test.*
-- **v4 — controlled stiffness contrast (Cosgrove 2024, *Science*; GSE243763, bulk RNA-seq).** A549
-  lung adenocarcinoma on soft (1 kPa) vs stiff (50 kPa) hydrogels, 3 replicates/condition. The
-  contrast the patient data structurally cannot provide: stiffness manipulated, everything else fixed.
-  *Result: the model's downstream cell-cycle targets shift **coordinately in the predicted direction**
+- **v4 - controlled stiffness experiments (Cosgrove 2024, *Science*; GSE243763, bulk RNA-seq).** A549
+  lung adenocarcinoma on soft (1 kPa) vs stiff (50 kPa) hydrogels, 3 replicates/condition.
+  *Result: the model's downstream cell-cycle targets shift coordinately in the predicted direction
   on stiff substrates (CCND1/MYC/SKP2 up, CDKN1A down, E2F program following; collective sign test
-  p=0.016, oriented Wilcoxon vs genome-wide background p=0.013). No single gene significant at 3v3 —
-  the claim is a coordinated set-level shift. A separate, strong YAP/TAZ response (padj 0.0017)
-  reproduces the source paper but lies outside the model. Caveat: A549 is KRAS-mutant — the mechanism
+  p=0.016, oriented Wilcoxon vs genome-wide background p=0.013). No single gene significant at 3v3,
+  the result is a coordinated set-level shift. A separate, strong YAP/TAZ response (padj 0.0017)
+  reproduces the source paper but lies outside the model. Caveat: A549 is KRAS-mutant, the mechanism
   in lung adenocarcinoma, not the EGFR context.*
 
 **Project arc:** tumors build the stiff niche (v1/v2, patient data) → cancer cells respond to it with
-the cell-cycle program the model predicts (v4, controlled contrast) → the treatment-trajectory data
-(v3) is honestly bracketed as a different axis → the kinase-input layer is tested by the manuscript's
+the cell-cycle program the model predicts (v4, controlled stiffness). The treatment-trajectory data
+(v3) is presented as a different axis → the kinase-input layer is tested by the manuscript's
 own phospho-Westerns, not by transcriptomics.
 
 ## Layout
@@ -77,29 +73,29 @@ notebooks/     writeups: v1_writeup, v2_kim_writeup, v3_maynard_writeup, cosgrov
 ```
 
 Each dataset is isolated by its own `config_<name>.yaml` (own `resources_dir` / `results_dir` /
-`samples`), so installments don't collide. Run with `--configfile config/config_<name>.yaml`.
+`samples`), so installments won't conflict. Run with `--configfile config/config_<name>.yaml`.
 
-## Environment notes (Windows 11 + Anaconda — read before running)
+## Environment notes (Windows 11 + Anaconda. Read before running!)
 
-The pipeline was developed on Windows; a few platform gotchas are baked into the scripts and worth
-knowing:
+The pipeline was developed on Windows; a few platform specific issues exist and are worth knowing
+before starting, you should probably just run this on Linux :)
 
 - **`--use-conda` is unreliable here.** The mamba activation banner pollutes Snakemake's Python
-  version-probe JSON. Workaround: `pip install snakemake` *into* the hashed scanpy conda env, activate
-  that env, and run Snakemake **without** `--use-conda` (all rules through CNV/DE share that one env,
+  version-probe JSON. Workaround: `pip install snakemake` into the hashed scanpy conda env, activate
+  that env, and run Snakemake without `--use-conda` (all rules through CNV/DE share that one env,
   which also has scanpy / infercnvpy / pydeseq2 / pyensembl).
 - **inferCNVpy on Windows** spawns subprocesses (tqdm `process_map`) that re-import the Snakemake
-  script and crash. `infer_cnv.py` monkeypatches `process_map` with a serial map; `n_jobs=1` alone
-  does **not** fix it. CNV scoring needs the full chain `cnv.tl.pca → cnv.pp.neighbors →
+  script and crash. `infer_cnv.py` patches `process_map` with a serial map; `n_jobs=1` alone
+  does not fix it. CNV scoring needs the full chain `cnv.tl.pca → cnv.pp.neighbors →
   cnv.tl.leiden → cnv.tl.cnv_score`.
-- **The HVG-subset trap.** `merge_normalize` writes `annotated.h5ad` with only the 2,000 HVGs. CNV /
-  gene-positions / pseudobulk-DE must read **full-gene** counts from the per-sample `resources/*.h5ad`,
+- **HVG-subset** `merge_normalize` writes `annotated.h5ad` with only the 2,000 HVGs. CNV /
+  gene-positions / pseudobulk-DE must read full-gene counts from the per-sample `resources/*.h5ad`,
   never from `annotated.h5ad`.
-- **The annotation-leak fix.** An empty `annotation: {}` cannot override a populated map through
-  Snakemake's deep-merge — provide a **complete** cluster→label map under `cluster:` (every cluster id
+- **annotation fix.** An empty `annotation: {}` cannot override a populated map through
+  Snakemake's deep-merge. Provide a complete cluster→label map under `cluster:` (every cluster id
   present). YAML: spaces not tabs, no semicolons.
 - **Barcode joins across `ad.concat(index_unique="-")`:** strip the `-{batch}` suffix; the match rate
-  ≈ the QC survival rate (≈99% for Kim, ≈80% for Maynard since its QC drops more failed wells — the
+  ≈ the QC survival rate (≈99% for Kim, ≈80% for Maynard since its QC drops more failed wells. The
   CNV assert threshold is set accordingly).
 
 ## Quick start
@@ -126,15 +122,15 @@ snakemake --configfile config/config_maynard.yaml --cores 4 results_maynard/clus
 - **v2 Kim:** `ingest_kim.py` (chunked loader for the big UMI matrix; integer UMIs → `seurat_v3`).
   Then `build_gene_positions.py` (pyensembl release 100) and `infer_cnv.py`. Fibroblast-restricted DE
   via `caf_de.py` (PyDESeq2; note author label is `Fibroblasts`, plural).
-- **v3 Maynard:** `ingest_maynard.py` (chunked dense-CSV loader; **strips ERCC spike-ins**; maps the
-  `analysis` column naive/grouped_pr/grouped_pd → TN/RD/PD; cell id is the `cell_id` *column*, not the
+- **v3 Maynard:** `ingest_maynard.py` (chunked dense-CSV loader; strips ERCC spike-ins; maps the
+  `analysis` column naive/grouped_pr/grouped_pd → TN/RD/PD; cell id is the `cell_id` column, not the
   row index). Smart-seq2 → `doublet_method: none`, `hvg_flavor: seurat`; mito genes are stripped from
   the matrix so the mito QC gate is disabled. Then the standard CNV path.
 - **v4 Cosgrove:** `ingest_cosgrove.py` assembles the 9 A549 RSEM `*.genes.results` files
   (from `GSE243763_RAW.tar`), strips Ensembl version suffixes, maps ENSG→symbol (pyensembl, HFF-table
   fallback), runs PyDESeq2 stiff-vs-soft, and scores the signatures. Then `check_model_targets.py`
   runs the per-gene + collective tests on the model's downstream cell-cycle targets. Bulk + 3v3, so
-  this is the simplest installment — no CNV, no integration.
+  this is the simplest installment, no CNV, no integration.
 
 ## Getting the data
 
@@ -145,12 +141,12 @@ snakemake --configfile config/config_maynard.yaml --cores 4 results_maynard/clus
   + `S01_metacells.csv`), linked from `github.com/czbiohub-sf/scell_lung_adenocarcinoma`. Pull with
   `gdown --folder`. (Raw SRA under PRJNA591860 is too heavy; use the processed CSVs.)
 - **v4 Cosgrove:** GEO GSE243763. `GSE243763_RAW.tar` holds the per-sample RSEM files; the 9 A549
-  samples are GSM9224457–9224465. `GSE243763_SupplementaryTable2.csv.gz` is the **HFF** DE table
+  samples are GSM9224457–9224465. `GSE243763_SupplementaryTable2.csv.gz` is the HFF DE table
   (useful only as an ENSG→symbol fallback). Pull via `GEOparse` or direct HTTPS from the GEO FTP path.
 
 ### Ingesting the SCEA MatrixMarket bundle (v1)
 
-SCEA hands you one aggregated matrix (genes × cells) + two sidecar files + a separate
+SCEA gives you one aggregated matrix (genes × cells) + two sidecar files + a separate
 experiment-design TSV. `scripts/ingest_scea.py` converts that bundle into per-donor `.h5ad`:
 
 ```bash
@@ -168,24 +164,24 @@ and disease→condition mapping — check those, override with `--condition-col`
 `--id-col` if needed.
 
 **Gene symbols.** SCEA's `.mtx_rows` is often Ensembl-only, which breaks `MT-` mito QC and
-symbol-based signatures. Resolve via `--gtf path/to/annotation.gtf` (offline, reproducible —
+symbol-based signatures. Resolve via `--gtf path/to/annotation.gtf` (offline, reproducible,
 recommended; use the release the data was built on) or `--use-mygene` (network, current annotations).
 Unmapped genes keep their Ensembl ID; originals are preserved in `adata.var['gene_ids']`.
 
 ## How to work with it
 
 Each `scripts/*.py` is a Snakemake `script:` step (the `snakemake` object is injected) or a
-standalone CLI (the v4 scripts). They are **starting points**, run rule-by-rule and refined as you
-inspect outputs — matching an iterative, output-driven workflow. The notebooks regenerate each
+standalone CLI (the v4 scripts). They are starting points, run rule-by-rule and refined as you
+inspect outputs, matching an iterative, output-driven workflow. The notebooks regenerate each
 installment's figures from the `results_<name>/` outputs.
 
-## Statistics conventions (baked in, and hard-won)
+## Statistics conventions
 
-- **DE and composition tests run on per-donor pseudobulk** — the donor is the replication unit, never
+- **DE and composition tests run on per-donor pseudobulk.** The donor is the replication unit, never
   the cell. Cell-level p-values are pseudoreplication.
 - **Always pair cell-level signature claims with a per-donor check.** This is not optional: in v3, the
   dramatic cell-level signature shifts (KW p < 1e-100) almost entirely vanished at the patient level
-  (N=5) — the per-donor view is what the result actually is.
+  (N=5). The per-donor view is what the result actually is.
 - **For multi-gene model predictions, test the set, not each gene.** With small replicate counts no
   single gene reaches significance; the right test is whether the predicted gene set is coordinately
   shifted (sign test + oriented-LFC Wilcoxon vs background, as in `check_model_targets.py`).
@@ -203,11 +199,11 @@ installment's figures from the `results_<name>/` outputs.
 - **The bimodality prediction (single-cell, still untested):** the model predicts a bimodal G1
   distribution (cycling + quiescent attractors) on soft + EGFRi substrates. The Cosgrove scRNA-seq
   CRISPRi series (GSE243756) could test whether the soft/stiff contrast produces that two-population
-  cell-state structure — using non-targeting guides for the clean contrast, targeted guides as a
+  cell-state structure, using non-targeting guides for the clean contrast, targeted guides as a
   perturbation test. More parsing work (guide demultiplexing), but it's the most distinctive remaining
   claim.
 - **Spatial NSCLC:** define stiff/soft regions by local CAF/ECM density and compare the same tumor's
-  cancer cells across them — the in-situ version of the v4 contrast.
+  cancer cells across them, the in-situ version of the v4 contrast.
 
 See `notebooks/stiffness_model_synthesis.md` for the full cross-dataset synthesis with all numbers
 and caveats.
