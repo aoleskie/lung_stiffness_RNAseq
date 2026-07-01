@@ -1,7 +1,7 @@
 # The stiffening lung and NSCLC drug tolerance
 
 An end-to-end single-cell pipeline built as a Snakemake workflow.
-It wanted to learn scRNA-seq workflow and test predictions from a dynamical-systems
+I wanted to learn scRNA-seq workflow and test predictions from a dynamical-systems
 NSCLC model with real data. The central thesis is that a stiff/fibrotic microenvironment increases 
 drug tolerance by increasing FAK/AKT/ERK activity in tumor cells, sustaining proliferation 
 (cyclin D–CDK4/6) and promoting EGFR-TKI tolerance. The project tests this across four datasets 
