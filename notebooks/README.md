@@ -1,14 +1,34 @@
 # Notebooks
 
-Interactive exploration that sits alongside the Snakemake pipeline. The pipeline
-produces the reproducible objects (`results/.../*.h5ad`); notebooks are where you
-poke at them cell-by-cell.
+The Snakemake pipeline produces the reproducible objects: `results_<name>/.../*.h5ad` and the CSV
+tables that sit beside them. These notebooks are where those objects get interrogated cell by cell
+and turned into an argument.
 
-Suggested per-stage notebooks (keep a clean + an executed copy of each, per the
-project convention):
+Four writeups, one per dataset, each self-contained and each reading only from its own
+`results_<name>/`:
 
-- `01_v1_explore.ipynb`  - load a QC'd object, sanity-check metrics, eyeball UMAP.
-- `02_v1_fibroblasts.ipynb` - subcluster mesenchyme, find the CTHRC1+ subset, stiffening scores.
-- `03_v2_tumor.ipynb` - annotate lineages, CNV-call malignant cells, model-node signatures.
+- `v1_writeup.ipynb` — Tsukui fibrotic lung. Recovers the CTHRC1⁺ pathologic fibroblast, then
+  separates its expansion in number from its activation per cell.
+- `v2_kim_writeup.ipynb` — Kim NSCLC. CNV-based malignant calling, the sequencing-depth confound
+  that caps what the calling can support, and the CAF bridge showing tumor stroma rebuilding the v1
+  niche.
+- `v3_maynard_writeup.ipynb` — Maynard treatment trajectory. Persister-state reprogramming, plus a
+  long look at why a treatment axis cannot test a stiffness prediction no matter how it is analyzed.
+- `cosgrove_a549_writeup.ipynb` — Cosgrove A549 hydrogels. The one controlled soft-versus-stiff
+  contrast in the project, and the only place the model's central prediction gets a fair test.
 
-Open any `.h5ad` with:  `import scanpy as sc; adata = sc.read_h5ad("results/cluster/annotated.h5ad")`
+`01_v1_explore.ipynb` is a scratch notebook rather than a writeup: load an object, check the metrics
+look sane, eyeball the UMAP. It earns its keep right after a rule finishes, when the only question
+is whether the output is worth building on.
+
+Each writeup walks up from the working directory to the repository root on startup, so they run from
+anywhere inside the repo. To open an object by hand:
+
+```python
+import scanpy as sc
+adata = sc.read_h5ad("results_kim/cluster/annotated.h5ad")
+```
+
+One thing worth knowing before poking around: `annotated.h5ad` carries only the 2,000 HVGs. If a
+gene you expected is missing, that is why, and the full-gene counts live in the per-sample
+`resources/*.h5ad` files.

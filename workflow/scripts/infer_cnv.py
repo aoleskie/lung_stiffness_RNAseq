@@ -2,20 +2,26 @@
 """
 CNV-based malignant-cell calling (inferCNVpy) for the Kim NSCLC atlas.
 
-WHY full-gene counts: CNV detection smooths expression across genes ordered along
-each chromosome, so it needs dense genome-wide coverage. annotated.h5ad is the 2,000
-HVG subset (wrong sampling), so we concatenate the per-sample resources/kim/*.h5ad
+Why full-gene counts: CNV detection smooths expression across genes ordered along each
+chromosome, so it needs dense genome-wide coverage. annotated.h5ad holds the 2,000-HVG
+subset, which is exactly the wrong sampling — HVGs are chosen for variability, not for
+even spacing along a chromosome. So concatenate the per-sample resources/kim/*.h5ad
 (all ~29,634 genes) and attach cell_type / leiden from annotated.h5ad by barcode.
 
 Reference = immune cells (diploid karyotype). Malignant = aneuploid epithelial cells.
-Normal-lung epithelium is the built-in sanity check: it should score near-diploid.
+Normal-lung epithelium is the built-in sanity check, since it is not cancer and therefore
+has to score near-diploid. Where it does not, suspect sequencing depth before biology:
+inferCNV reads low-coverage noise as copy-number deviation, and in Kim that correlation
+runs to r = -0.79 (characterized in the v2 writeup).
 
 Outputs:
   - h5ad with obs['cnv_score'] and obs['cnv_status'] (malignant/normal/reference/other)
   - per-cell cnv_score table (csv)
   - diagnostic figures: CNV score distribution + score by cell type / condition
-The malignant threshold is PROVISIONAL (data-driven from the epithelial bimodality);
-inspect the distribution plot and finalize cnv_score_threshold in config.
+
+The malignant threshold is provisional, picked from the epithelial bimodality in the data
+itself rather than from any external standard. Inspect the distribution plot and finalize
+cnv_score_threshold in config before trusting a per-cell call.
 """
 import re
 import glob
