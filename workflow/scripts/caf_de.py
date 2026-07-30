@@ -2,20 +2,26 @@
 """
 Fibroblast-restricted pseudobulk DE (tumor vs normal CAFs) — Kim GSE131907.
 
-Separates COMPOSITIONAL from CELL-INTRINSIC activation, exactly as v1 did:
-  - whole-tissue DE : tumor vs normal across ALL cells per donor (includes cell-type
-                      composition shifts — e.g. "tumors have more fibroblasts")
-  - fibroblast DE   : tumor vs normal within FIBROBLASTS only per donor (the
-                      fibroblast-compartment-intrinsic signal, composition removed)
+Separates compositional from cell-intrinsic activation, the same way v1 did. A score
+difference between tumor and normal fibroblasts has two possible causes and cannot
+distinguish them on its own: tumors may simply hold more pathologic fibroblasts, or the
+fibroblasts present may each express the program harder. Running the contrast twice does
+distinguish them:
+  - whole-tissue DE : tumor vs normal across all cells per donor, which deliberately
+                      includes cell-type composition shifts ("tumors have more fibroblasts")
+  - fibroblast DE   : tumor vs normal within fibroblasts only per donor, which holds
+                      composition fixed and leaves what the compartment is doing
 
-Interpretation (v1 logic):
-  * a gene UP in whole-tissue that DROPS OUT when restricted to fibroblasts was
-    COMPOSITIONAL (driven by cell-type proportions, not CAF activation).
-  * a gene UP in BOTH, and SHARPER (more significant / larger LFC) in the fibroblast
-    analysis, is CELL-INTRINSIC CAF activation — the mechanistic upgrade of the CAF bridge.
+Reading the two together:
+  * a gene up in whole-tissue that drops out under restriction was compositional, driven
+    by cell-type proportions rather than by CAF activation.
+  * a gene up in both, and sharper (larger LFC or more significant) in the fibroblast
+    analysis, is cell-intrinsic CAF activation. That is the mechanistic upgrade of the
+    CAF bridge, since restriction should have diluted it and instead it grew.
 
-Reads raw-count full-gene per-donor files from results_kim/qc/*.h5ad (NOT the 2k-HVG
-annotated.h5ad). Pseudobulk by hand in pandas; round to int for PyDESeq2.
+Reads raw-count full-gene per-donor files from results_kim/qc/*.h5ad, never the 2k-HVG
+annotated.h5ad — CNV and DE both need genome-wide coverage the HVG subset does not have.
+Pseudobulk by hand in pandas; round to int for PyDESeq2.
 
 Run (in an env with pydeseq2 — e.g. pip install pydeseq2 into the scanpy env):
     python workflow/scripts/caf_de.py

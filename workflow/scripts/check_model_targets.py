@@ -1,5 +1,14 @@
 #!/usr/bin/env python3
-# Per-gene check of the model's DOWNSTREAM cell-cycle targets in the A549 stiff-vs-soft contrast.
+# Per-gene and collective check of the model's DOWNSTREAM cell-cycle targets in the A549
+# stiff-vs-soft contrast.
+#
+# Only the downstream targets are testable here. The model's inputs (AKT/ERK/FAK) are
+# phospho-regulated kinase activities set from Westerns, and RNA-seq says nothing about
+# whether a protein is phosphorylated.
+#
+# Every gene's predicted direction below comes from the ODE rate laws, fixed before the
+# data was opened. That prespecification is what makes the collective test at the bottom
+# meaningful rather than a search for whichever genes happened to agree.
 #
 # Usage: python check_model_targets.py --deseq results_cosgrove/deseq2_stiff_vs_soft.csv
 
