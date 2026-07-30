@@ -1,6 +1,6 @@
 # The stiffening lung and NSCLC drug tolerance
 
-A lung tumor builds the ground it stands on. Fibroblasts in and around the tumor lay down collagen
+A lung tumor can build the ground it stands on. Fibroblasts in and around the tumor lay down collagen
 and crosslink it until the tissue is measurably stiffer than the lung it replaced, and the working
 claim is that cancer cells living in that stiffened tissue are harder to kill with an EGFR
 inhibitor. This repository is where I went to find out how much of that four public datasets will
