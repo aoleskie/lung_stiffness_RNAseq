@@ -29,9 +29,11 @@ qc:
 # Smart-seq2 read counts -> use "seurat" flavor (operates on log-normalized data), NOT seurat_v3
 # (seurat_v3 expects UMI-like raw counts; full-length read counts violate its mean-variance model).
 normalization:
+  method: "lognorm"
   target_sum: 10000       # CP10k then log1p
   n_top_genes: 2000
   hvg_flavor: "seurat"
+  n_pcs: 30
 
 # ---- integration ----
 # Batch is plate (technical) — Smart-seq2 plate effects are real. Patient is the donor unit.

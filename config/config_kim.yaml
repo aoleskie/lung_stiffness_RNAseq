@@ -28,9 +28,11 @@ qc:
 # KEY v1->v2 CHANGE: Kim is integer UMI, so seurat_v3 (the better, raw-count flavor) works.
 # v1 was forced to "seurat" because SCEA counts were fractional. No rounding hacks needed here.
 normalization:
+  method: "lognorm"
   target_sum: 10000       # CP10k
   n_top_genes: 2000
   hvg_flavor: "seurat_v3" # requires integer counts -> valid for Kim
+  n_pcs: 30
 
 # ---- integration ----
 integration:
@@ -98,5 +100,4 @@ de:
 # Diploid reference = immune cells (unambiguously normal karyotype).
 cnv:
   cnv_score_threshold: 0.0115   # set from the diagnostic: valley between diploid (~0.008) and aneuploid (~0.014) epithelial modes
-
 

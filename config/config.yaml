@@ -27,10 +27,11 @@ qc:
   doublet_method: "scrublet"
 
 # ---- normalization / features / PCA ---------------------------------------
-norm:
+normalization:
   method: "lognorm"      # lognorm (log1p CP10k) | pearson (analytic residuals)
   target_sum: 10000
   n_top_genes: 2000
+  hvg_flavor: "seurat"   # SCEA expression values are fractional; seurat_v3 expects raw counts
   n_pcs: 30
 
 # ---- integration -----------------------------------------------------------
