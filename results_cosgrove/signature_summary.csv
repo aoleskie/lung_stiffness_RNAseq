@@ -1,4 +1,4 @@
-signature,n_genes,soft_score,stiff_score,stiff_minus_soft,mean_LFC_stiff_vs_soft,median_padj,predicted
+signature,n_genes,soft_score,stiff_score,stiff_minus_soft,mean_LFC_stiff_vs_soft,median_gene_level_padj,predicted
 fak_focal_adhesion,8,-0.748,0.131,0.879,0.231,3.35e-01,UP on stiff
 pi3k_akt_axis,6,-0.733,0.307,1.04,0.119,7.03e-01,UP on stiff
 proliferation,6,-0.539,0.136,0.675,0.163,5.04e-01,UP on stiff

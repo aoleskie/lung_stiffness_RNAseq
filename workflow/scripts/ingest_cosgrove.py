@@ -174,14 +174,18 @@ def main():
         # DESeq2 mean LFC across the signature genes (stiff vs soft), if available
         if de is not None:
             sig_lfc = de.loc[de["symbol"].isin(genes), "log2FoldChange"].mean()
-            sig_padj = de.loc[de["symbol"].isin(genes), "padj"].median()
+            # Descriptive summary of constituent gene-level tests; this is not a
+            # pathway- or signature-level adjusted p-value.
+            median_gene_level_padj = de.loc[de["symbol"].isin(genes), "padj"].median()
         else:
-            sig_lfc, sig_padj = np.nan, np.nan
+            sig_lfc, median_gene_level_padj = np.nan, np.nan
         rows.append({"signature": name, "n_genes": len(syms),
                      "soft_score": round(soft, 3), "stiff_score": round(stiff, 3),
                      "stiff_minus_soft": round(stiff - soft, 3),
                      "mean_LFC_stiff_vs_soft": round(sig_lfc, 3) if sig_lfc == sig_lfc else np.nan,
-                     "median_padj": (f"{sig_padj:.2e}" if sig_padj == sig_padj else "NA"),
+                     "median_gene_level_padj": (f"{median_gene_level_padj:.2e}"
+                                                  if median_gene_level_padj == median_gene_level_padj
+                                                  else "NA"),
                      "predicted": "UP on stiff" if name in
                          ("fak_focal_adhesion","pi3k_akt_axis","proliferation","cdk46_cellcycle") else "(readout/ctrl)"})
     summary = pd.DataFrame(rows).set_index("signature")

@@ -60,8 +60,10 @@ limit what transcriptomics is allowed to say here.
   oriented z-score units, Welch 95% CI +0.03 to +1.91, exact one-sided permutation p = 0.050).
   E2F1/CCNE1 are retained as descriptive downstream support rather than pooled into the primary
   test. No single gene clears significance at 3 vs 3.
-  A separate and much stronger YAP/TAZ response (padj 0.0017) reproduces the source paper but sits
-  outside the model. Caveat worth its weight: A549 is KRAS-mutant, so this places the mechanism in
+  A separate, pronounced YAP/TAZ response (mean LFC +0.58; median constituent gene-level adjusted
+  p-value 0.0017) reproduces the source paper but sits outside the model. The 0.0017 value is a
+  descriptive median, not a pathway-level adjusted p-value. Caveat worth its weight: A549 is
+  KRAS-mutant, so this places the mechanism in
   lung adenocarcinoma generally, not in the EGFR context the model is ultimately about.*
 
 **The arc.** Tumors build the stiff niche, and patient data shows it (v1 and v2). Cancer cells
