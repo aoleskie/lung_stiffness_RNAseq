@@ -1,0 +1,9 @@
+sample_id	donor_id	condition	input_type	path
+IPF1	IPF1	fibrotic	matrix	resources/tsukui/IPF1.h5ad
+IPF2	IPF2	fibrotic	matrix	resources/tsukui/IPF2.h5ad
+IPF3	IPF3	fibrotic	matrix	resources/tsukui/IPF3.h5ad
+Normal1	Normal1	normal	matrix	resources/tsukui/Normal1.h5ad
+Normal2	Normal2	normal	matrix	resources/tsukui/Normal2.h5ad
+Normal3	Normal3	normal	matrix	resources/tsukui/Normal3.h5ad
+Scleroderma1	Scleroderma1	fibrotic	matrix	resources/tsukui/Scleroderma1.h5ad
+Scleroderma2	Scleroderma2	fibrotic	matrix	resources/tsukui/Scleroderma2.h5ad

@@ -1,0 +1,10 @@
+,condition,rep,gsm,file
+soft_rep1,soft,1,GSM9224457,GSM9224457_A549.rnaseq.1kPa.rep1.star2.rsem.genes.results.txt.gz
+soft_rep2,soft,2,GSM9224458,GSM9224458_A549.rnaseq.1kPa.rep2.star2.rsem.genes.results.txt.gz
+soft_rep3,soft,3,GSM9224459,GSM9224459_A549.rnaseq.1kPa.rep3.star2.rsem.genes.results.txt.gz
+stiff_rep1,stiff,1,GSM9224460,GSM9224460_A549.rnaseq.50kPa.rep1.star2.rsem.genes.results.txt.gz
+stiff_rep2,stiff,2,GSM9224461,GSM9224461_A549.rnaseq.50kPa.rep2.star2.rsem.genes.results.txt.gz
+stiff_rep3,stiff,3,GSM9224462,GSM9224462_A549.rnaseq.50kPa.rep3.star2.rsem.genes.results.txt.gz
+tcp_rep1,tcp,1,GSM9224463,GSM9224463_A549.rnaseq.TCP.rep1.star2.rsem.genes.results.txt.gz
+tcp_rep2,tcp,2,GSM9224464,GSM9224464_A549.rnaseq.TCP.rep2.star2.rsem.genes.results.txt.gz
+tcp_rep3,tcp,3,GSM9224465,GSM9224465_A549.rnaseq.TCP.rep3.star2.rsem.genes.results.txt.gz

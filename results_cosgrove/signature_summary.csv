@@ -1,0 +1,7 @@
+signature,n_genes,soft_score,stiff_score,stiff_minus_soft,mean_LFC_stiff_vs_soft,median_padj,predicted
+fak_focal_adhesion,8,-0.748,0.131,0.879,0.231,3.35e-01,UP on stiff
+pi3k_akt_axis,6,-0.733,0.307,1.04,0.119,7.03e-01,UP on stiff
+proliferation,6,-0.539,0.136,0.675,0.163,5.04e-01,UP on stiff
+cdk46_cellcycle,7,-0.62,0.53,1.15,0.118,7.27e-01,UP on stiff
+yap_taz_targets,7,-1.039,0.031,1.07,0.581,1.66e-03,(readout/ctrl)
+stiffening_ecm,6,-0.256,0.589,0.844,1.459,3.82e-01,(readout/ctrl)
