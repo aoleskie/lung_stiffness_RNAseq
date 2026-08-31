@@ -1,0 +1,7 @@
+set,gene,prediction,driver,rate_law_or_rationale,symbol,baseMean,log2FC,lfcSE,pvalue,padj,verdict
+primary_direct,CCND1,UP,"AKT,ERK",CycD synthesis driven by AKT & ERK,CCND1,13880.55894162421,0.3913797176809502,0.1262206237633278,0.0019302541256383,0.0804069333507632,correct direction; gene-level FDR >= 0.05
+primary_direct,MYC,UP,"AKT,ERK",Myc synthesis driven by AKT & ERK,MYC,4321.721600668648,0.1264387324161505,0.0816154957420895,0.1213336306013486,0.5233041284954475,correct direction; gene-level FDR >= 0.05
+primary_direct,SKP2,UP,FAK,Skp2 synthesis driven by FAK,SKP2,666.7900536812209,0.2689035325136825,0.141015572955406,0.0565326780941546,0.3975477245548597,correct direction; gene-level FDR >= 0.05
+primary_direct,CDKN1A,DOWN,FAK,p21 synthesis repressed by FAK (FAK in denominator),CDKN1A,8584.397700366035,-0.0854160044599831,0.0982963833235419,0.3848668995745182,0.7484996039696843,correct direction; gene-level FDR >= 0.05
+secondary_support,E2F1,UP,downstream,CycD->pRb phosphorylation releases E2F,E2F1,2069.4543876690045,0.1797801225361427,0.1382364944591093,0.1934208319566775,0.6099313622480357,correct direction; gene-level FDR >= 0.05
+secondary_support,CCNE1,UP,downstream,CycE is an E2F target downstream of CycD/Rb/E2F,CCNE1,792.8749607124454,0.2315000007541013,0.1225904042578609,0.0589719634786062,0.4034429249750109,correct direction; gene-level FDR >= 0.05

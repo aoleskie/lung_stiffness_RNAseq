@@ -11,7 +11,8 @@
 # Input : per-sample RSEM gene results from GSE243763_RAW.tar (9 A549 files), e.g.
 #         GSM9224457_A549.rnaseq.1kPa.rep1.star2.rsem.genes.results.txt.gz
 #         columns: gene_id (versioned ENSG), expected_count, TPM, FPKM, ...
-# Output: results_cosgrove/  -> counts matrix, DESeq2 table (50kPa vs 1kPa), signature scores, figure.
+# Output: results_cosgrove/  -> counts/TPM matrices, DESeq2 table (50kPa vs 1kPa),
+#                                signature scores, figure.
 #
 # Usage:
 #   python ingest_cosgrove.py --raw-dir geo_tmp/raw --hff-table geo_tmp/GSE243763_SupplementaryTable2.csv.gz \
@@ -124,6 +125,7 @@ def main():
     print("1) assembling A549 RSEM counts ...")
     C, T, M = load_counts(args.raw_dir)
     C.to_csv(os.path.join(args.outdir, "a549_counts.csv"))
+    T.to_csv(os.path.join(args.outdir, "a549_tpm.csv"))
     M.to_csv(os.path.join(args.outdir, "a549_samples.csv"))
 
     print("2) ENSG -> symbol map ...")
@@ -209,7 +211,7 @@ def main():
     fig.suptitle("A549 soft (1 kPa) vs stiff (50 kPa) — model-node signatures", y=1.03)
     plt.tight_layout(); plt.savefig(os.path.join(args.outdir, "figures_signatures.png"),
                                     dpi=150, bbox_inches="tight")
-    print(f"\nwrote {args.outdir}/ (counts, DESeq2 table, signature_summary.csv, figures_signatures.png)")
+    print(f"\nwrote {args.outdir}/ (counts/TPM, DESeq2 table, signature_summary.csv, figures_signatures.png)")
 
 
 if __name__ == "__main__":

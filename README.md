@@ -55,10 +55,11 @@ limit what transcriptomics is allowed to say here.
   N = 5). Reframed as a treatment-trajectory result rather than a stiffness test.*
 - **v4, controlled stiffness (Cosgrove 2024, *Science*; GSE243763, bulk RNA-seq).** A549 lung
   adenocarcinoma grown on soft (1 kPa) and stiff (50 kPa) hydrogels, 3 replicates per condition.
-  *Result: the model's downstream cell-cycle targets shift together in the predicted direction on
-  stiff substrates (CCND1/MYC/SKP2 up, CDKN1A down, the E2F program following; collective sign test
-  p = 0.016, oriented Wilcoxon against a genome-wide background p = 0.013). No single gene clears
-  significance at 3 vs 3, so what this is measuring is a coordinated set-level shift, not a gene.
+  *Result: a prespecified score of the four direct downstream targets (CCND1/MYC/SKP2 up, CDKN1A
+  down) is higher in all 3 stiff replicates than in all 3 soft replicates (stiff - soft = +0.97
+  oriented z-score units, Welch 95% CI +0.03 to +1.91, exact one-sided permutation p = 0.050).
+  E2F1/CCNE1 are retained as descriptive downstream support rather than pooled into the primary
+  test. No single gene clears significance at 3 vs 3.
   A separate and much stronger YAP/TAZ response (padj 0.0017) reproduces the source paper but sits
   outside the model. Caveat worth its weight: A549 is KRAS-mutant, so this places the mechanism in
   lung adenocarcinoma generally, not in the EGFR context the model is ultimately about.*
@@ -148,10 +149,10 @@ snakemake --configfile config/config_maynard.yaml --cores 4 results_maynard/clus
   path.
 - **v4 Cosgrove:** `ingest_cosgrove.py` assembles the 9 A549 RSEM `*.genes.results` files from
   `GSE243763_RAW.tar`, strips Ensembl version suffixes, maps ENSG→symbol (pyensembl, with an
-  HFF-table fallback), runs PyDESeq2 stiff-vs-soft, and scores the signatures. Then
-  `check_model_targets.py` runs the per-gene and collective tests on the model's downstream
-  cell-cycle targets. Bulk data at 3 vs 3, so this is the simplest installment by a wide margin:
-  no CNV, no integration.
+  HFF-table fallback), runs PyDESeq2 stiff-vs-soft, and exports counts, TPM, and signature scores.
+  Then `check_model_targets.py` preserves the per-gene LFC table descriptively and runs the
+  prespecified oriented target score with biological replicate as the inferential unit. Bulk data
+  at 3 vs 3, so this is the simplest installment by a wide margin: no CNV, no integration.
 
 ## Getting the data
 
@@ -210,10 +211,10 @@ a result I briefly believed.
   dramatic cell-level signature shifts (KW p < 1e-100, which looks unanswerable) very nearly
   vanished at the patient level across N = 5 donors. The per-donor view is what the result actually
   was; the cell-level view was an artifact of counting thousands of non-independent cells.
-- **For a multi-gene prediction, test the set, not each gene.** With small replicate counts no
-  single gene will reach significance, and demanding that it does asks the wrong question. Test
-  whether the predicted gene set moved coordinately: a sign test plus an oriented-LFC Wilcoxon
-  against background, as in `check_model_targets.py`.
+- **For a multi-gene prediction, score the set within each biological replicate.** Correlated genes
+  are not independent trials. `check_model_targets.py` orients and averages the prespecified direct
+  targets into one score per sample, then reports the stiff-minus-soft effect, uncertainty, and an
+  exact label-permutation p-value across the 3-vs-3 design.
 - **Match the axis of variation to the hypothesis.** A treatment axis (v3) cannot test a stiffness
   prediction however beautifully powered it is; only a stiffness contrast (v4) can. Sample size
   does not rescue the wrong instrument.

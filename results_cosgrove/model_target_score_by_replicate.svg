@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="560" viewBox="0 0 720 560">
+<rect width="100%" height="100%" fill="white"/>
+<style>text{font-family:Arial,sans-serif;fill:#222}.tick{font-size:12px}.label{font-size:14px}.small{font-size:12px}.title{font-size:18px;font-weight:600}</style>
+<text x="360" y="30" text-anchor="middle" class="title">Prespecified direct targets across biological replicates</text>
+<line x1="105" y1="75" x2="105" y2="390" stroke="#222"/>
+<line x1="105" y1="390" x2="680" y2="390" stroke="#222"/>
+<line x1="99" y1="390.0" x2="105" y2="390.0" stroke="#222"/>
+<text x="95" y="394.0" text-anchor="end" class="tick">-1.24</text>
+<line x1="99" y1="311.2" x2="105" y2="311.2" stroke="#222"/>
+<text x="95" y="315.2" text-anchor="end" class="tick">-0.70</text>
+<line x1="99" y1="232.5" x2="105" y2="232.5" stroke="#222"/>
+<text x="95" y="236.5" text-anchor="end" class="tick">-0.15</text>
+<line x1="99" y1="153.8" x2="105" y2="153.8" stroke="#222"/>
+<text x="95" y="157.8" text-anchor="end" class="tick">+0.39</text>
+<line x1="99" y1="75.0" x2="105" y2="75.0" stroke="#222"/>
+<text x="95" y="79.0" text-anchor="end" class="tick">+0.94</text>
+<line x1="105" y1="210.6" x2="680" y2="210.6" stroke="#999" stroke-dasharray="4 4"/>
+<circle cx="227.0" cy="267.4" r="7" fill="#4C78A8" stroke="white" stroke-width="1.2"/>
+<text x="227.0" y="255.4" text-anchor="middle" class="small">rep1</text>
+<circle cx="255.0" cy="226.5" r="7" fill="#4C78A8" stroke="white" stroke-width="1.2"/>
+<text x="255.0" y="214.5" text-anchor="middle" class="small">rep2</text>
+<circle cx="283.0" cy="348.3" r="7" fill="#4C78A8" stroke="white" stroke-width="1.2"/>
+<text x="283.0" y="336.3" text-anchor="middle" class="small">rep3</text>
+<line x1="200" y1="280.7" x2="310" y2="280.7" stroke="#111" stroke-width="3"/>
+<text x="255" y="418" text-anchor="middle" class="label">Soft (1 kPa)</text>
+<circle cx="497.0" cy="116.7" r="7" fill="#E45756" stroke="white" stroke-width="1.2"/>
+<text x="497.0" y="104.7" text-anchor="middle" class="small">rep1</text>
+<circle cx="525.0" cy="158.4" r="7" fill="#E45756" stroke="white" stroke-width="1.2"/>
+<text x="525.0" y="146.4" text-anchor="middle" class="small">rep2</text>
+<circle cx="553.0" cy="146.2" r="7" fill="#E45756" stroke="white" stroke-width="1.2"/>
+<text x="553.0" y="134.2" text-anchor="middle" class="small">rep3</text>
+<line x1="470" y1="140.5" x2="580" y2="140.5" stroke="#111" stroke-width="3"/>
+<text x="525" y="418" text-anchor="middle" class="label">Stiff (50 kPa)</text>
+<text x="22" y="235" text-anchor="middle" class="label" transform="rotate(-90 22 235)">Primary oriented model score</text>
+<text x="22" y="235" text-anchor="middle" class="label" transform="rotate(-90 22 235) translate(0 18)">(mean oriented gene z-score)</text>
+<text x="105" y="455" class="label">stiff - soft = +0.97</text>
+<text x="105" y="480" class="label">Welch 95% CI [+0.03, +1.91]</text>
+<text x="105" y="505" class="label">exact one-sided permutation p = 0.050</text>
+<text x="105" y="535" class="small">Points are biological replicates; black bars are group means.</text>
+</svg>
