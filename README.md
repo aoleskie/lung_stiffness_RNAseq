@@ -1,23 +1,22 @@
-# The stiffening lung and NSCLC drug tolerance
+# Transcriptomic evidence for stromal remodeling and stiffness-associated responses in NSCLC
 
-A lung tumor can build the ground it stands on. Fibroblasts in and around the tumor lay down collagen
-and crosslink it until the tissue is measurably stiffer than the lung it replaced, and the working
-claim is that cancer cells living in that stiffened tissue are harder to kill with an EGFR
-inhibitor. This repository is where I went to find out how much of that four public datasets will
-actually support.
+This repository evaluates which components of a proposed stiffness-to-drug-tolerance mechanism are
+supported by four public lung fibrosis and lung adenocarcinoma datasets. The proposed mechanism is
+that a fibrotic, mechanically altered microenvironment increases FAK/AKT/ERK activity in tumor
+cells, sustains cyclin D-CDK4/6-associated proliferation, and promotes EGFR-TKI tolerance.
 
-There were two reasons to build it. I wanted a single-cell workflow I had assembled myself rather
-than read about, and I wanted to put a dynamical-systems model of NSCLC drug tolerance in front of
-data it had never seen. The thesis under test: a stiff, fibrotic microenvironment increases drug
-tolerance by raising FAK/AKT/ERK activity in tumor cells, which sustains proliferation through
-cyclin D–CDK4/6 and promotes EGFR-TKI tolerance. Four datasets, one Snakemake pipeline.
+The datasets address distinct components of this mechanism. Fibrosis and NSCLC single-cell data
+characterize stromal ECM-remodeling programs; a controlled hydrogel experiment tests
+stiffness-associated transcriptional responses in lung adenocarcinoma cells; and longitudinal
+patient data characterize treatment-associated persister states. No single dataset tests the full
+causal chain.
 
 ## The model being tested
 
-The mitosis-apoptosis model (soon to be submitted!) takes **AKT, ERK, and FAK as three independent
+The mitosis-apoptosis model takes **AKT, ERK, and FAK as three independent
 measured inputs**: kinase activities set per (stiffness, drug) condition from phospho-Westerns,
-feeding a cell-cycle/apoptosis ODE system. Two things follow from that structure, and both of them
-limit what transcriptomics is allowed to say here.
+feeding a cell-cycle/apoptosis ODE system. Two aspects of that structure define what the
+transcriptomic analyses can test.
 
 1. **The kinase inputs are phospho-regulated, not transcriptional.** No amount of scRNA-seq will
    measure AKT/ERK/FAK activity; the manuscript measures those by Western. What transcriptomics can
@@ -29,30 +28,29 @@ limit what transcriptomics is allowed to say here.
 
 ## The four datasets
 
-- **v1, fibrosis (Tsukui 2020, E-CURD-126 / GSE132771).** Recover the CTHRC1+ pathologic fibroblast
-  population and quantify the matrix-stiffening program (collagens plus the LOX/LOXL2 crosslinkers)
-  that expands in fibrotic lung. *Result: the stiffening niche is there, and it is cell-intrinsic.
-  The pathologic fraction separates fibrotic from normal donors at p = 0.018, which is the floor a
-  5-vs-3 comparison can report; every fibrotic donor sits above every normal one. Pseudobulk DE
-  then separates the compositional effect from the cell-intrinsic one.*
+- **v1, fibrosis (Tsukui 2020, E-CURD-126 / GSE132771).** Recovers the CTHRC1+ pathologic fibroblast
+  population and quantifies an ECM-remodeling program that includes collagens and LOX-family
+  crosslinkers. *Result: CTHRC1+ fibroblasts expand in fibrotic lung, with complete donor-level
+  separation from normal lung (5 fibrotic versus 3 normal donors; exact p = 0.018). The
+  fibroblast-restricted pseudobulk analysis also identifies increased ECM-remodeling expression
+  within the fibroblast compartment. Because fibroblast states remain heterogeneous, this result
+  is not interpreted as strictly cell-intrinsic activation.*
 - **v2, the NSCLC microenvironment (Kim 2020, GSE131907).** Call malignant cells by CNV and
-  characterize the tumor microenvironment. *Result: the CAF bridge. Tumor fibroblasts
-  cell-intrinsically reactivate the CTHRC1+ stiffening program relative to normal lung fibroblasts
-  (p ≈ 0, below what this sample size can resolve), and fibroblast-restricted PyDESeq2 confirms the
-  activation is per-cell rather than compositional. Tumors build the stiff niche. The malignant
-  cells themselves are a different story: their mechanotransduction signatures run flat to lower,
-  and malignant calling is confounded by sequencing depth (r = −0.79), a droplet artifact that caps
-  how far the tumor-intrinsic claim can go.*
+  characterize the tumor microenvironment. *Result: tumor-associated fibroblasts recapitulate a
+  CTHRC1-associated fibrotic ECM-remodeling program linked to matrix stiffening. The signal persists
+  in fibroblast-restricted pseudobulk, distinguishing it from immune or epithelial composition;
+  however, differences among fibroblast states remain a possible contributor. Malignant-cell
+  mechanotransduction signatures are flat or lower, and CNV-based malignant calling is confounded
+  by sequencing depth (r = -0.79), limiting tumor-cell inference.*
 - **v3, the treatment trajectory (Maynard 2020, PRJNA591860, Smart-seq2).** EGFR/ALK lung
   adenocarcinoma sampled from treatment-naive through residual disease (the persister state) to
-  progression. The cleanest CNV calling in the project, since Smart-seq2 sequences every cell to
-  comparable depth and the confound that limited Kim never appears. *Result: real persister
-  biology. The alveolar-regenerative (AT2) program switches on at residual disease and cyclin
-  D–CDK4/6 collapses, which is persister quiescence. The treatment axis, though, bundles drug
-  exposure with clonal selection with elapsed time, and it never varies stiffness at all, so it
-  cannot test the stiffness prediction. The cell-level mechano-signatures turn out to be
-  pseudoreplication and do not survive aggregation to the patient (YAP, RD vs TN, p ≈ 1.0 across
-  N = 5). Reframed as a treatment-trajectory result rather than a stiffness test.*
+  progression. Smart-seq2 depth reduces the CNV-scoring confound observed in Kim. *Result: residual
+  disease is associated with an increased alveolar-regenerative/AT2 program and decreased cyclin
+  D-CDK4/6-associated expression, consistent with a treatment-associated persister state. The
+  design combines drug exposure, elapsed time, and clonal selection and contains no stiffness axis;
+  it therefore provides orthogonal treatment-state context rather than a direct stiffness test.
+  Cell-level mechanotransduction differences do not persist after aggregation to patients (YAP/TAZ,
+  RD versus TN, p approximately 1.0; N = 5 per group).*
 - **v4, controlled stiffness (Cosgrove 2024, *Science*; GSE243763, bulk RNA-seq).** A549 lung
   adenocarcinoma grown on soft (1 kPa) and stiff (50 kPa) hydrogels, 3 replicates per condition.
   *Result: a prespecified score of the four direct downstream targets (CCND1/MYC/SKP2 up, CDKN1A
@@ -62,15 +60,17 @@ limit what transcriptomics is allowed to say here.
   test. No single gene clears significance at 3 vs 3.
   A separate, pronounced YAP/TAZ response (mean LFC +0.58; median constituent gene-level adjusted
   p-value 0.0017) reproduces the source paper but sits outside the model. The 0.0017 value is a
-  descriptive median, not a pathway-level adjusted p-value. Caveat worth its weight: A549 is
-  KRAS-mutant, so this places the mechanism in
-  lung adenocarcinoma generally, not in the EGFR context the model is ultimately about.*
+  descriptive median, not a pathway-level adjusted p-value. Because A549 is KRAS-mutant, this
+  result supports a stiffness-associated response in lung adenocarcinoma but does not establish the
+  response in the EGFR-mutant context addressed by the model.*
 
-**The arc.** Tumors build the stiff niche, and patient data shows it (v1 and v2). Cancer cells
-respond to stiffness with the cell-cycle program the model predicts, and a controlled contrast
-shows that (v4). The treatment trajectory (v3) belongs to a different axis and is presented as one.
-The kinase-input layer is tested by the manuscript's own phospho-Westerns; transcriptomics never
-gets a vote on it.
+**Evidence synthesis.** Fibrotic lung and NSCLC stroma share a CTHRC1-associated ECM-remodeling
+program consistent with generation of a mechanically altered microenvironment (v1 and v2). In a
+controlled stiffness experiment, lung adenocarcinoma cells show coordinated transcriptional changes
+in prespecified cell-cycle targets downstream of the model's mechanosensitive inputs (v4). The
+treatment trajectory provides separate evidence about persister-state biology but cannot connect
+that state to stiffness (v3). Transcriptomics does not directly assay the phospho-regulated kinase
+inputs or validate the complete stiffness-to-drug-tolerance causal chain.
 
 ## Layout
 
@@ -90,11 +90,9 @@ Each dataset is walled off by its own `config_<name>.yaml`, with its own `resour
 `results_dir`, and `samples`, so the installments cannot collide. Run with
 `--configfile config/config_<name>.yaml`.
 
-## Environment notes (Windows 11 + Anaconda; read this part first)
+## Platform notes (Windows 11 and Anaconda)
 
-I developed the pipeline on Windows, which I can now report was a decision. A handful of
-platform-specific problems are worth knowing about before you start, and the shortest path around
-every one of them is to run this on Linux :)
+The following Windows-specific issues affect reproducibility and environment activation.
 
 - **`--use-conda` is unreliable here.** The mamba activation banner pollutes the JSON that
   Snakemake's Python version-probe expects to parse. Workaround: `pip install snakemake` into the
@@ -105,7 +103,7 @@ every one of them is to run this on Linux :)
   script and crash. `infer_cnv.py` patches `process_map` with a serial map; setting `n_jobs=1` on
   its own does not fix it. CNV scoring needs the full chain `cnv.tl.pca → cnv.pp.neighbors →
   cnv.tl.leiden → cnv.tl.cnv_score`.
-- **The HVG subset is a trap.** `merge_normalize` writes `annotated.h5ad` with only the 2,000 HVGs.
+- **Full-gene analyses must not use the HVG subset.** `merge_normalize` writes `annotated.h5ad` with only the 2,000 HVGs.
   CNV, gene positions, and pseudobulk DE all need full-gene counts and must read the per-sample
   `resources/*.h5ad`, never `annotated.h5ad`.
 - **Annotation overrides.** An empty `annotation: {}` cannot override a populated map through
@@ -142,8 +140,8 @@ snakemake --configfile config/config_maynard.yaml --cores 4 results_maynard/clus
   HVG flavor is forced to `seurat`. Details in the SCEA section below.
 - **v2 Kim:** `ingest_kim.py` chunk-loads the large UMI matrix; the counts are integer UMIs, so
   `seurat_v3`. Then `build_gene_positions.py` (pyensembl release 100) and `infer_cnv.py`.
-  Fibroblast-restricted DE runs through `caf_de.py` (PyDESeq2; the author's label is `Fibroblasts`,
-  plural, which will bite you once).
+  Fibroblast-restricted DE runs through `caf_de.py`; the author-provided label is the plural
+  `Fibroblasts`.
 - **v3 Maynard:** `ingest_maynard.py` chunk-loads the dense CSV, strips ERCC spike-ins, and maps the
   `analysis` column naive/grouped_pr/grouped_pd onto TN/RD/PD. Cell identity lives in the `cell_id`
   column, not the row index. Smart-seq2 means `doublet_method: none` and `hvg_flavor: seurat`, and
@@ -154,7 +152,7 @@ snakemake --configfile config/config_maynard.yaml --cores 4 results_maynard/clus
   HFF-table fallback), runs PyDESeq2 stiff-vs-soft, and exports counts, TPM, and signature scores.
   Then `check_model_targets.py` preserves the per-gene LFC table descriptively and runs the
   prespecified oriented target score with biological replicate as the inferential unit. Bulk data
-  at 3 vs 3, so this is the simplest installment by a wide margin: no CNV, no integration.
+  at 3 versus 3 and requires no CNV or integration step.
 
 ## Getting the data
 
@@ -163,8 +161,8 @@ snakemake --configfile config/config_maynard.yaml --cores 4 results_maynard/clus
   `cell_annotation.txt.gz`), into `resources/kim/`.
 - **v3 Maynard:** processed CSVs from the study's Google Drive (`Data_input/csv_files/S01_datafinal.csv`
   and `S01_metacells.csv`), linked from `github.com/czbiohub-sf/scell_lung_adenocarcinoma`. Pull them
-  with `gdown --folder`. The raw SRA under PRJNA591860 is far too heavy for what you get; use the
-  processed CSVs.
+  with `gdown --folder`. The processed CSVs are the recommended inputs; the raw SRA under
+  PRJNA591860 is substantially larger and is not required for this workflow.
 - **v4 Cosgrove:** GEO GSE243763. `GSE243763_RAW.tar` holds the per-sample RSEM files, and the 9
   A549 samples are GSM9224457–9224465. `GSE243763_SupplementaryTable2.csv.gz` is the HFF DE table,
   useful here only as an ENSG→symbol fallback. Pull via `GEOparse` or direct HTTPS from the GEO FTP
@@ -186,12 +184,12 @@ python workflow/scripts/ingest_scea.py \
 
 It transposes to cells × genes, resolves gene symbols, joins the design TSV for condition and
 donor, writes one `.h5ad` per donor, and emits `config/samples_tsukui.tsv`. It also prints the
-columns it detected and the disease→condition mapping it inferred, which are worth reading before
-you trust them; override with `--condition-col`, `--donor-col`, or `--id-col` if it guessed wrong.
+columns it detected and the inferred disease-to-condition mapping. Review these diagnostics and
+override with `--condition-col`, `--donor-col`, or `--id-col` when necessary.
 
 **Gene symbols.** SCEA's `.mtx_rows` is often Ensembl-only, which quietly breaks both `MT-` mito QC
 and every symbol-based signature. Resolve them with `--gtf path/to/annotation.gtf` (offline,
-reproducible, and my recommendation; use the release the data was built on) or `--use-mygene`
+reproducible; use the release on which the data were built) or `--use-mygene`
 (network, current annotations). Unmapped genes keep their Ensembl ID, and the originals are
 preserved in `adata.var['gene_ids']` either way.
 
@@ -204,22 +202,21 @@ regenerate each installment's figures from the `results_<name>/` outputs.
 
 ## Statistics conventions
 
-These are the rules the project runs on, and most of them exist because ignoring one of them cost me
-a result I briefly believed.
+The analyses use the following statistical conventions.
 
 - **DE and composition tests run on per-donor pseudobulk.** The donor is the replication unit, never
-  the cell. A cell-level p-value across a handful of donors is pseudoreplication wearing a lab coat.
+  the cell. Cell-level tests across a small number of donors constitute pseudoreplication.
 - **Pair every cell-level signature claim with a per-donor check.** This is not optional. In v3 the
-  dramatic cell-level signature shifts (KW p < 1e-100, which looks unanswerable) very nearly
-  vanished at the patient level across N = 5 donors. The per-donor view is what the result actually
-  was; the cell-level view was an artifact of counting thousands of non-independent cells.
+  large cell-level signature differences (KW p < 1e-100) were not retained at the patient level
+  across N = 5 donors. The per-donor result is the relevant inferential result; the cell-level test
+  counted non-independent observations.
 - **For a multi-gene prediction, score the set within each biological replicate.** Correlated genes
   are not independent trials. `check_model_targets.py` orients and averages the prespecified direct
   targets into one score per sample, then reports the stiff-minus-soft effect, uncertainty, and an
   exact label-permutation p-value across the 3-vs-3 design.
 - **Match the axis of variation to the hypothesis.** A treatment axis (v3) cannot test a stiffness
-  prediction however beautifully powered it is; only a stiffness contrast (v4) can. Sample size
-  does not rescue the wrong instrument.
+  prediction; a controlled stiffness contrast (v4) is required. Increased sample size does not
+  compensate for the absence of the relevant experimental variable.
 - **Signature scores export with donor and condition keys** so they can be aggregated and
   bootstrapped. Treat any difference found in a small subpopulation as provisional until it has
   survived a look at the donor level.
@@ -239,16 +236,18 @@ a result I briefly believed.
 - **Spatial NSCLC.** Define stiff and soft regions by local CAF and ECM density, then compare the
   same tumor's cancer cells across them. That is the v4 contrast run in situ, without the hydrogel.
 
-## Where this landed
+## Summary of evidence
 
-Across four datasets, the stromal half of the model holds up and the tumor-cell half holds up in a
-controlled contrast but not in patient tissue. Fibrotic lung and NSCLC stroma both carry the same
-CTHRC1+ collagen program, and in both it survives the test that separates "more of these cells" from
-"these cells doing more." Cancer cells on stiff hydrogels shift the model's downstream cell-cycle
-targets coordinately in the predicted direction. The two patient datasets could never have shown the
-second thing, because neither one contains a soft-versus-stiff comparison, and saying so is most of
-what v2 and v3 contribute.
+Fibrotic lung and NSCLC stroma share a CTHRC1-associated ECM-remodeling program consistent with a
+mechanically altered microenvironment. The fibroblast-restricted analyses show that this signal is
+not explained solely by immune or epithelial composition, although differences among fibroblast
+states remain unresolved. In a controlled hydrogel experiment, A549 cells show concordant changes
+in prespecified cell-cycle targets downstream of the mechanosensitive inputs represented in the
+model.
 
-That is a narrower result than the project set out to get, and I think it is the honest shape of it.
-The value is in knowing which datasets can answer which question, which is a cheaper lesson to learn
-here than in a manuscript.
+The Maynard treatment trajectory independently characterizes a drug-tolerant persister state but
+does not contain a stiffness contrast. The Kim malignant-cell analysis is limited by depth-dependent
+CNV scoring. Together, the datasets support distinct stromal and tumor-cell components of the
+proposed mechanism without directly validating the complete causal chain from stiffness through
+FAK/AKT/ERK activity to EGFR-TKI tolerance. EGFR-specific transcriptomic confirmation under
+controlled stiffness remains a central unresolved test.

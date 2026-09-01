@@ -2,7 +2,8 @@
 """
 Fibroblast-restricted pseudobulk DE (tumor vs normal CAFs) — Kim GSE131907.
 
-Separates compositional from cell-intrinsic activation, the same way v1 did. A score
+Separates broad tissue-composition effects from expression differences within the fibroblast
+compartment, using the same design as v1. A score
 difference between tumor and normal fibroblasts has two possible causes and cannot
 distinguish them on its own: tumors may simply hold more pathologic fibroblasts, or the
 fibroblasts present may each express the program harder. Running the contrast twice does
@@ -16,8 +17,8 @@ Reading the two together:
   * a gene up in whole-tissue that drops out under restriction was compositional, driven
     by cell-type proportions rather than by CAF activation.
   * a gene up in both, and sharper (larger LFC or more significant) in the fibroblast
-    analysis, is cell-intrinsic CAF activation. That is the mechanistic upgrade of the
-    CAF bridge, since restriction should have diluted it and instead it grew.
+    analysis, supports increased expression within the fibroblast compartment. This restriction
+    does not control for differences among fibroblast states.
 
 Reads raw-count full-gene per-donor files from results_kim/qc/*.h5ad, never the 2k-HVG
 annotated.h5ad — CNV and DE both need genome-wide coverage the HVG subset does not have.
@@ -103,7 +104,7 @@ def main():
           f"{dict(meta_fib.condition.value_counts())}")
     res_fib = run_deseq(ct_fib, meta_fib)
 
-    # ---- composition vs cell-intrinsic: focus genes side by side ----
+    # ---- whole-tissue vs fibroblast-restricted: focus genes side by side ----
     comp = pd.DataFrame({
         "LFC_whole":  res_all["log2FoldChange"].reindex(FOCUS),
         "padj_whole": res_all["padj"].reindex(FOCUS),
@@ -111,8 +112,8 @@ def main():
         "padj_fib":   res_fib["padj"].reindex(FOCUS),
     })
     comp["sharpens_in_fib"] = (comp["LFC_fib"] > comp["LFC_whole"]) & (comp["padj_fib"] < 0.05)
-    print("\n=== composition vs cell-intrinsic (focus genes) ===")
-    print("  LFC>0 = up in tumor; 'sharpens_in_fib' = cell-intrinsic CAF activation")
+    print("\n=== whole-tissue vs fibroblast-restricted DE (focus genes) ===")
+    print("  LFC>0 = up in tumor; 'sharpens_in_fib' = stronger within the fibroblast compartment")
     print(comp.round(3).to_string())
 
     res_all.to_csv(f"{OUT_DIR}/caf_wholetissue_de.csv")
@@ -146,7 +147,7 @@ def main():
     ax[1].plot([-lim, lim], [-lim, lim], ls="--", lw=.7, c="#888")  # y=x: above => sharpens in fib
     ax[1].axhline(0, lw=.4, c="#bbb"); ax[1].axvline(0, lw=.4, c="#bbb")
     ax[1].set_xlabel("LFC whole-tissue"); ax[1].set_ylabel("LFC fibroblast-restricted")
-    ax[1].set_title("Above y=x = sharper within fibroblasts\n(cell-intrinsic CAF activation)")
+    ax[1].set_title("Above y=x = sharper in fibroblast-restricted DE\n(within-compartment evidence)")
     plt.tight_layout()
     plt.savefig(f"{FIG_DIR}/caf_de_volcano.png", dpi=150, bbox_inches="tight")
     print(f"\nwrote {FIG_DIR}/caf_de_volcano.png and DE CSVs to {OUT_DIR}/")
